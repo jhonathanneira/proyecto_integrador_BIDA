@@ -2,6 +2,7 @@ const express = require ('express');
 const mysql = require ('mysql2');
 const cors = require ('cors');
 
+
 var app = express();
 app.use(express.json());
 
@@ -41,17 +42,18 @@ connection.connect(function (error) {
     }
 })
 
+
 // ======
 // método para mostrar todos los registros de la tabla productos
 // ======
 
 
-app.get('/app/productos', (req, res)=>{
+app.get('/app/producto', (req, res)=>{
     const sql = 'SELECT * FROM productos';
 
     connection.query(sql, (error, filas)=> {
         if (error) {
-            console.error('error al obtener productos', error)
+            console.error('error al obtener producto', error)
             res.status(500).send({ 
                 message: 'Error al obtener productos',
                 detalleError: error.code
@@ -81,10 +83,10 @@ app.get('/app/productos', (req, res)=>{
 
 
 
-app.get('/app/productos/:idProducto', (req, res) => {
+app.get('/app/producto/:idProducto', (req, res) => {
 
     const idProducto = req.params.idProducto;
-    const sql = 'SELECT * FROM productos WHERE idProducto = ?';
+    const sql = 'SELECT * FROM producto WHERE idProducto = ?';
 
     connection.query(sql, [idProducto], (error, fila) => {
 
@@ -123,7 +125,7 @@ app.get('/app/productos/:idProducto', (req, res) => {
 // Método para crear un producto
 //===========================================
 
-app.post('/app/productos', (req, res) => {
+app.post('/app/producto', (req, res) => {
     let datos = {
         nombre: req.body.nombre,
         codigoBarra: req.body.codigoBarra,
@@ -160,7 +162,7 @@ app.post('/app/productos', (req, res) => {
 //===========================================
 
 
-app.put('/app/productos/:idProducto', (req, res) => {
+app.put('/app/producto/:idProducto', (req, res) => {
     
     const idProducto = req.params.idProducto;
 
@@ -177,7 +179,7 @@ app.put('/app/productos/:idProducto', (req, res) => {
     } = req.body;
 
     // El orden de los placeholders en la SQL debe coincidir con el orden en el array de valores.
-    const sql = "UPDATE productos SET nombre = ?, codigoBarra = ?, precioVenta = ?, precioCompra = ?, categoria = ?, unidadMedida = ?, fechaVencimiento = ? WHERE idProducto = ?";
+    const sql = "UPDATE producto SET nombre = ?, codigoBarra = ?, precioVenta = ?, precioCompra = ?, categoria = ?, unidadMedida = ?, fechaVencimiento = ? WHERE idProducto = ?";
 
     // Array de valores, asegurando el orden correcto de los datos
     const datos = [
@@ -224,11 +226,11 @@ app.put('/app/productos/:idProducto', (req, res) => {
 //===========================================
 
 
-app.delete('/app/productos/:idProducto', (req, res) => {
+app.delete('/app/producto/:idProducto', (req, res) => {
 
     const idProducto = req.params.idProducto;
 
-    const sql = 'DELETE FROM productos WHERE idProducto = ?';
+    const sql = 'DELETE FROM producto WHERE idProducto = ?';
 
     connection.query(sql, [idProducto], function(error, resultado){
 
@@ -255,3 +257,13 @@ app.delete('/app/productos/:idProducto', (req, res) => {
         }
     });
 });
+
+
+
+
+
+
+// conexión de rutas
+
+
+ 
