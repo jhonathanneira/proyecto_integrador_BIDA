@@ -53,3 +53,5 @@ connection.connect(function (error) {
 
  app.use('/app', productoRoutes(connection));
  app.use('/app', empleadoRoutes(connection));
+
+ 
