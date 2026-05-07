@@ -3,6 +3,7 @@ const mysql = require ('mysql2');
 const cors = require ('cors');
 const productoRoutes = require('./routes/productoRoutes');
 const empleadoRoutes = require('./routes/empleadoRoutes');
+const ventaRoutes = require('./routes/ventaRoutes');
 
 
 var app = express();
@@ -53,5 +54,5 @@ connection.connect(function (error) {
 
  app.use('/app', productoRoutes(connection));
  app.use('/app', empleadoRoutes(connection));
-
+ app.use('/app', ventaRoutes(connection));
  
