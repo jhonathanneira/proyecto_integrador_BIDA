@@ -1,0 +1,1 @@
+﻿"{\r\n    \"idEmpleado\":  1,\r\n    \"idCliente\":  2,\r\n    \"metodoPago\":  \"EFECTIVO\",\r\n    \"productos\":  [\r\n                      {\r\n                          \"idProducto\":  5,\r\n                          \"cantidad\":  2,\r\n                          \"precioUnitario\":  10000\r\n                      }\r\n                  ]\r\n}"
