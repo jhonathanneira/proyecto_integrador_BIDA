@@ -12,7 +12,7 @@ module.exports = (connection) => {
 ruta.get('/empleado', (req, res)=>{
     const sql = 'SELECT * FROM empleado';
     
-    connection.query(sql, (error, empleados)=> {
+    connection.query(sql, (error, empleado)=> {
 
 
 
