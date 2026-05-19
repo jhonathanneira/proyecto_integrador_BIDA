@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda BIDA</title>
+  <link rel="stylesheet" href="imagenes.css">
+  <link rel="stylesheet" href="textos.css">
+  <link rel="stylesheet" href="botones.css">
+</head>
+<body>
+  <header class="app-bar">
+    <div class="app-brand">
+      <img src="assets/logo-500x500.png" alt="Logo BIDA" class="brand-logo">
+      <div>
+        <p class="brand-name">BIDA</p>
+        <p class="brand-tagline">Odontología Especializada</p>
+      </div>
+    </div>
+    <div class="app-search">
+      <input type="text" class="top-search-input" placeholder="Buscar pacientes por nombre, apellido o documento...">
+    </div>
+    <nav class="app-menu">
+      <a href="#" class="is-active">Agenda</a>
+      <a href="#">Pacientes</a>
+      <a href="#">Administración</a>
+      <a href="#">Reportes</a>
+      <a href="#">CRM</a>
+    </nav>
+    <div class="app-actions">
+      <button class="pill">Novedades</button>
+      <button class="pill ghost">Administrador ▾</button>
+    </div>
+  </header>
+
+  <section class="app-subbar">
+    <div class="subbar-left">
+      <span class="subbar-section-title">Agenda</span>
+      <span class="badge">4 Citas</span>
+    </div>
+    <div class="subbar-tabs">
+      <button class="tab is-active">Diaria</button>
+      <button class="tab">Semanal</button>
+      <button class="tab">Reprogramación</button>
+    </div>
+    <div class="subbar-right">
+      <button class="toolbar-btn primary">Dar cita</button>
+      <button class="toolbar-btn">Fecha</button>
+      <button class="toolbar-btn">Imprimir</button>
+    </div>
+  </section>
+
+  <div class="agenda-shell">
+    <div class="agenda-panel">
+      <aside class="agenda-sidebar">
+        <div class="agenda-date-nav">
+          <button class="date-nav-btn" id="prevDayBtn">‹</button>
+          <div class="agenda-date-card">
+            <span class="agenda-date-day" id="agendaDay">Jueves</span>
+            <span class="agenda-date-number" id="agendaDate">19</span>
+            <span class="agenda-date-month" id="agendaMonthYear">Octubre 2023</span>
+          </div>
+          <button class="date-nav-btn" id="nextDayBtn">›</button>
+        </div>
+
+        <div class="agenda-alert-card">
+          <span class="agenda-alert-title">4 citas programadas</span>
+          <span class="agenda-alert-subtitle">3 canceladas</span>
+        </div>
+
+        <div class="agenda-filter">
+          <label for="profesionales">Profesionales</label>
+          <select id="profesionales" class="agenda-select">
+            <option>Todos los profesionales</option>
+            <option>Dr(a). Lobos</option>
+            <option>Dr. Rodríguez</option>
+            <option>Higienista</option>
+          </select>
+        </div>
+
+        <button class="sidebar-button">Marcar todos</button>
+
+        <ul class="agenda-status-list">
+          <li class="status-item status-whatsapp">Contactado por chat de WhatsApp</li>
+          <li class="status-item status-confirmed">Confirmado por WhatsApp</li>
+          <li class="status-item status-call">Contactado por llamada</li>
+          <li class="status-item status-new">Nueva cita asignada</li>
+        </ul>
+      </aside>
+
+      <main class="agenda-content">
+        <div class="agenda-controls">
+          <div class="agenda-search">
+            <input type="text" class="search-input search-input--large" placeholder="Buscar nombre del paciente en las citas de hoy...">
+          </div>
+          <div class="agenda-actions">
+            <button class="toolbar-btn inline">Dar cita</button>
+            <button class="toolbar-btn inline">Fecha</button>
+            <button class="toolbar-btn inline">Imprimir</button>
+          </div>
+        </div>
+
+        <section class="agenda-table" aria-label="Citas del día">
+          <div class="agenda-row agenda-row--head">
+            <span>Hora</span>
+            <span>Paciente</span>
+            <span>Doctor</span>
+            <span>Estado de la cita</span>
+            <span>Situación</span>
+          </div>
+
+          <article class="agenda-row">
+            <div class="agenda-hour">
+              <div class="hour-chip">
+                <span class="hour hour-start">11:45</span>
+                <span class="hour-arrow">↓</span>
+                <span class="hour hour-end">12:15</span>
+              </div>
+              <span class="hour-box">BOX 1</span>
+            </div>
+            <div class="agenda-patient">
+              <a class="patient-name" href="#">Daniel Jimenez</a>
+              <p class="patient-data">3458213 · +57 3233276</p>
+            </div>
+            <div class="agenda-doctor">
+              <p>Dr(a). Lobos</p>
+            </div>
+            <div class="agenda-status">
+              <span class="tag tag-waiting">En sala de espera desde las 10:19</span>
+              <a class="tag-link" href="#">Sin motivo</a>
+            </div>
+            <div class="agenda-flag">
+              <span class="flag flag-debt">⚠ Deudas</span>
+            </div>
+          </article>
+
+          <article class="agenda-row">
+            <div class="agenda-hour">
+              <div class="hour-chip">
+                <span class="hour hour-start">15:00</span>
+                <span class="hour-arrow">↓</span>
+                <span class="hour hour-end">15:35</span>
+              </div>
+              <span class="hour-box">BOX 1</span>
+            </div>
+            <div class="agenda-patient">
+              <a class="patient-name" href="#">Ana Palacio</a>
+              <p class="patient-data">458746 · +57 3142374932</p>
+            </div>
+            <div class="agenda-doctor">
+              <p>Dr. Rodríguez</p>
+            </div>
+            <div class="agenda-status">
+              <span class="tag tag-done">Atendido</span>
+              <span class="tag-note">Sin motivo</span>
+            </div>
+            <div class="agenda-flag">
+              <span class="flag flag-diagnostic">Diagnóstico</span>
+            </div>
+          </article>
+
+          <article class="agenda-row">
+            <div class="agenda-hour">
+              <div class="hour-chip">
+                <span class="hour hour-start">19:40</span>
+                <span class="hour-arrow">↓</span>
+                <span class="hour hour-end">20:15</span>
+              </div>
+              <span class="hour-box">BOX 1</span>
+            </div>
+            <div class="agenda-patient">
+              <a class="patient-name" href="#">Martha Gomez</a>
+              <p class="patient-data">Múltiples citas hoy · +57 3194118341</p>
+            </div>
+            <div class="agenda-doctor">
+              <p>Dr. Rodríguez</p>
+            </div>
+            <div class="agenda-status">
+              <span class="tag tag-done">Atendido</span>
+              <span class="tag-note">Retiro perno</span>
+            </div>
+            <div class="agenda-flag">
+              <span class="flag flag-debt">⚠ Deudas</span>
+            </div>
+          </article>
+
+          <article class="agenda-row">
+            <div class="agenda-hour">
+              <div class="hour-chip warning">
+                <span class="hour hour-start">23:00</span>
+                <span class="hour-arrow">↓</span>
+                <span class="hour hour-end">23:30</span>
+              </div>
+              <span class="hour-box">BOX 2</span>
+            </div>
+            <div class="agenda-patient">
+              <a class="patient-name" href="#">Martha Gomez</a>
+              <p class="patient-data">234567 · +57 3194118341</p>
+            </div>
+            <div class="agenda-doctor">
+              <p>Dr(a). García</p>
+            </div>
+            <div class="agenda-status">
+              <span class="tag tag-pending">No confirmado</span>
+              <span class="tag-note">Urgencia</span>
+            </div>
+            <div class="agenda-flag">
+              <span class="flag flag-debt">⚠ Deudas</span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="BIDA_agenda.js"></script>
+</body>
+</html>

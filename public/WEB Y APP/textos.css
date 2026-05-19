@@ -1,0 +1,53 @@
+/* Estilo para los títulos */
+h1 {
+    /* Mantiene el texto centrado */
+    text-align: center; 
+    margin-top: 40px;
+    margin-bottom: 50px; 
+    color: #1a1a1a; 
+    font-size: 2.5rem;
+}
+
+h2 {
+    
+    text-align: center;
+    margin-top: 100px;
+    color: #1a1a1a;
+    font-size: 2rem; 
+}
+
+
+.titulo-movible {    /* ODONTOLOGÍA ESPECIALIZADA del Inicio de sesión */
+    position: absolute;
+    top: 250px; /* Ajusta este valor para mover verticalmente */
+    left: 30px; /* Ajusta este valor para mover horizontalmente */
+    color: #1a1a1a;
+    font-size: 2rem; /* Tamaño aumentado */
+}
+
+/* Estilos para labels e inputs en el formulario de login */
+label {
+    font-size: 1.5rem; /* Tamaño de fuente aumentado para labels */
+    color: #1a1a1a;
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+    font-size: 1.2rem; /* Tamaño de fuente aumentado para inputs */
+    padding: 15px; /* Padding aumentado para campos más grandes */
+    width: 300px; /* Ancho fijo aumentado */
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.search-input {
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 200px;
+}
+

@@ -33,7 +33,7 @@ ruta.get('/empleado', (req, res)=>{
 
 
 // ==========================================================
-// METODO PARA OBTENER UN EMPLEADO (GET /api/empleados/:id)
+// MÉTODO PARA OBTENER UN EMPLEADO (GET /api/empleados/:id)
 // ==========================================================
 
 
