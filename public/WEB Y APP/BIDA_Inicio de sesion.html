@@ -5,47 +5,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Imagen de fondo</title>
   <style>
-    body {
+    body.login-page {
       margin: 0;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 160px 16px 24px;
+      box-sizing: border-box;
       background-image: url('assets/Fondo BIDA.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
+      gap: 18px;
+      overflow-y: auto;
     }
 
-    .form-container {
+    body.login-page .form-container {
       text-align: center;
       background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente para mejor legibilidad */
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: min(100%, 420px);
+      box-sizing: border-box;
+    }
+
+    body.login-page form {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    body.login-page .form-container label {
+      text-align: left;
+      margin-bottom: 0;
+    }
+
+    body.login-page .form-container input,
+    body.login-page .form-container button {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    body.login-page .form-container input {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 900px) {
+      body.login-page {
+        padding-top: 8px;
+        gap: 12px;
+      }
+
+      body.login-page .titulo-movible {
+        position: static;
+        top: auto;
+        left: auto;
+        margin: 0;
+        font-size: 1.35rem;
+        line-height: 1.1;
+      }
+
+      body.login-page .logo-small {
+        position: static;
+        max-width: 90px;
+        width: 24vw;
+      }
+
+      body.login-page h1 {
+        margin: 0;
+      }
+
+      body.login-page .form-container {
+        padding: 14px;
+      }
+
+      body.login-page label {
+        font-size: 1.1rem;
+      }
+
+      body.login-page input[type="text"],
+      body.login-page input[type="password"],
+      body.login-page input[type="email"],
+      body.login-page input[type="tel"],
+      body.login-page .boton {
+        font-size: 1rem;
+        padding: 12px;
+      }
     }
 
   </style>
     
 </head>
-<body>
+<body class="login-page">
   
     <link rel="stylesheet" href="imagenes.css">
     <link rel="stylesheet" href="textos.css">
     <link rel="stylesheet" href="botones.css">
 
-    <h1 class="titulo-movible">ODONTOLOGÍA<br>ESPECIALIZADA</h1>
-    
     <img src="assets/logo-500x500.png" alt="Logo BIDA" class="logo-small">
+    <h1 class="titulo-movible">ODONTOLOGÍA<br>ESPECIALIZADA</h1>
     
     <div class="form-container">
     <form id="loginForm">
         <label for="username">Usuario o Email:</label>
-        <input type="text" id="username" name="username" required><br><br>
+        <input type="text" id="username" name="username" required>
 
         <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required><br><br>
+        <input type="password" id="password" name="password" required>
 
         <button type="submit" class="boton">Iniciar Sesión</button>
     </form>

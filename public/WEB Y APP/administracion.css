@@ -1,0 +1,86 @@
+/* base general */
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f4f6fb; /* Fondo gris claro suave */
+    color: #1f2933;
+}
+
+/* --- ESTILOS DEL HEADER --- */
+.app-bar { display: flex; align-items: center; gap: 20px; padding: 12px 32px; background-color: #007ab8; color: #fff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.app-brand { display: flex; align-items: center; gap: 12px; }
+.logo-placeholder { background: #fff; color: #007ab8; padding: 10px; font-weight: bold; border-radius: 8px; }
+.brand-logo { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+.brand-name { font-size: 1.1rem; font-weight: 600; margin: 0; }
+.brand-tagline { margin: 0; font-size: 0.85rem; color: #d9edf7; }
+.app-brand { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.app-search { flex: 1 1 320px; min-width: 120px; }
+.top-search-input { width: 100%; padding: 10px 18px; border-radius: 999px; border: none; box-sizing: border-box; }
+.app-menu { display: flex; gap: 16px; font-size: 0.95rem; flex: 0 0 auto; }
+.app-menu { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.top-search-input { max-width: 520px; }
+.app-menu { flex-shrink: 0; }
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+    .top-search-input { max-width: 360px; }
+    .brand-name { font-size: 1rem; }
+    .brand-tagline { display: none; }
+    .brand-logo { width: 40px; height: 40px; }
+}
+
+@media (max-width: 768px) {
+    .app-bar { padding: 8px 14px; gap: 8px; }
+    .top-search-input { display: none; }
+    .app-menu { gap: 8px; }
+    .pill { padding: 6px 10px; font-size: 0.9rem; }
+    .app-actions { gap: 6px; }
+}
+
+/* Additional breakpoint to better contain search on mid-sized windows */
+@media (max-width: 1000px) {
+  .app-search { flex: 1 1 220px; }
+  .top-search-input { max-width: 260px; }
+}
+.app-menu a { color: #d9edf7; text-decoration: none; padding-bottom: 4px; border-bottom: 2px solid transparent; }
+.app-menu a.is-active { border-bottom-color: #fff; color: #fff; }
+.app-actions { display: flex; gap: 10px; }
+.pill { border: none; padding: 8px 14px; border-radius: 999px; background-color: #00a3ff; color: #fff; font-weight: 600; cursor: pointer; }
+.pill.ghost { background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.6); }
+
+/* --- SUBBAR --- */
+.app-subbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background-color: #ffffff; border-bottom: 1px solid #dde3ea; }
+.subbar-section-title { font-weight: 600; font-size: 1.2rem; color: #1a1a1a; }
+.subbar-tabs { display: flex; gap: 10px; }
+.tab { padding: 8px 18px; border: none; background-color: #e5e7eb; border-radius: 999px; font-size: 0.95rem; cursor: pointer; color: #4b5563; font-weight: 500; transition: all 0.2s;}
+.tab.is-active { background-color: #005792; color: white; }
+.toolbar-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid #cfd7e6; background-color: #fff; cursor: pointer; font-weight: 600; }
+.toolbar-btn.primary { background-color: #00a3ff; color: white; border: none; }
+
+/* --- CONTENEDOR PRINCIPAL ADMINISTRACIÓN --- */
+.admin-shell { padding: 30px 40px; padding-top: calc(30px + var(--header-height, 72px)); }
+.admin-panel { max-width: 1400px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); padding: 30px; }
+.admin-content { display: none; /* Oculto por defecto */ flex-direction: column; gap: 20px; }
+.admin-content.active { display: flex; /* Visible cuando tiene la clase active */ }
+.admin-header h2 { margin: 0 0 5px 0; color: #005792; font-size: 1.8rem; }
+.admin-header p { margin: 0; color: #6b7280; font-size: 1rem; }
+
+/* --- TABLAS ESTILO TARJETA (BIDA Style) --- */
+.data-table-container { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.data-table-head { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px; padding: 0 24px 10px; border-bottom: 2px solid #e0e6f0; font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.data-row { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px; align-items: center; padding: 20px 24px; background-color: #ffffff; border: 1px solid #e0e6f0; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
+.data-row:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
+
+/* --- ELEMENTOS INTERNOS DE LA TABLA --- */
+.main-text { font-weight: 700; color: #1a1a1a; font-size: 1.1rem; }
+.sub-text { color: #6b7280; font-size: 0.9rem; margin-top: 4px; }
+.status-badge { padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; width: fit-content; }
+.status-active { background-color: #dcfce7; color: #15803d; }
+.status-inactive { background-color: #fee2e2; color: #b91c1c; }
+
+/* Botones de acción (Editar/Borrar) */
+.action-buttons { display: flex; gap: 8px; }
+.btn-icon { background: #f0f2f7; border: none; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; color: #4b5563; font-weight: bold; transition: background 0.2s; }
+.btn-icon:hover { background: #e0e6f0; color: #005792; }
+.btn-icon.delete:hover { background: #fee2e2; color: #ef4444; }

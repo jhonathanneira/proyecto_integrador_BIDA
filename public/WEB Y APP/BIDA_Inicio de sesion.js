@@ -7,8 +7,8 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     // Lógica básica de validación (puedes expandir esto)
     if (username && password) {
         alert('Inicio de sesión exitoso para: ' + username);
-        // Redirigir a la página de agenda
-        window.location.href = 'BIDA_agenda.html';
+        // Redirigir a la página de administración
+        window.location.href = 'administracion.html';
     } else {
         alert('Por favor, complete todos los campos.');
     }

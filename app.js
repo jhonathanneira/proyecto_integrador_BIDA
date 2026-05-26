@@ -11,6 +11,10 @@ var app = express();
 // Middleware para normalizar JSON que llega doble-encodado como string
 // (p. ej. body: "{\"id\":1,...}") — intenta parsear hasta obtener un objeto.
 app.use(express.text({ type: '*/*' }));
+// Permitir peticiones desde el front-end (dev). Ajustar origen según sea necesario.
+app.use(cors());
+// También aceptar JSON estándar
+app.use(express.json());
 app.use((req, res, next) => {
     const raw = req.body;
     if (!raw || typeof raw !== 'string') {

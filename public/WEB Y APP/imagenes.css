@@ -1,565 +1,568 @@
-
-body {
-  margin: 0;
-  height: 100vh;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  font-size: 18px;
-  /* Ruta de la imagen de fondo */
-  background-image: url('assets/Fondo BIDA.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #1f2933;
-}
-
-
-
-
-.logo {
-    max-width: 15%;
-    height: auto;
-    border-radius: 20px;
-    display: block;
-    margin: 0 auto;
-}
-
-
-
-.logo-small {
-    max-width: 10%;
-    height: auto;
-    border-radius: 20px;
-    position: absolute;
-    top: 30px; /* Ajusta este valor para mover verticalmente */
-    left: 30px; /* Ajusta este valor para mover horizontalmente */
-}
-
-.header-bar {
-    background-color: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-}
-.logo-header {
-    height: 50px;
-}
-
-/* --- Agenda Layout --- */
-.agenda-wrapper {
-    display: flex;
-    height: 100vh;
-    background-color: rgba(255, 255, 255, 0.9);
-}
-
-.agenda-sidebar {
-    width: 320px;
-    background-color: #f4f6fb;
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
-}
-
-.agenda-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 30px;
-    overflow-y: auto;
-    gap: 20px;
-}
-
-.agenda-date-card {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background-color: white;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    border: 1px solid #e0e6f0;
-}
-
-.agenda-date-number {
-    font-size: 3.2rem;
-    font-weight: bold;
-    color: #005792;
-}
-
-.agenda-alert-card {
-    background-color: #fff3d4;
-    border-radius: 10px;
-    padding: 15px;
-    border: 1px solid #f1d18a;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.agenda-filter label {
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.agenda-select {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #cfd7e6;
-}
-
-.agenda-status-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.status-item {
-    font-size: 0.9rem;
-    padding-left: 10px;
-    border-left: 4px solid transparent;
-}
-
-.status-WhatsApp { border-color: #25d366; }
-.status-confirmed { border-color: #2b9ccf; }
-.status-call { border-color: #f7aa00; }
-.status-new { border-color: #6c63ff; }
-
-.agenda-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.agenda-title {
-    font-size: 2.4rem;
-    margin: 0;
-}
-
-.agenda-subtitle {
-    font-size: 1.2rem;
-    margin: 4px 0 0;
-    color: #4b5563;
-}
-
-.agenda-tabs {
-    display: flex;
-    gap: 12px;
-}
-
-.tab {
-    padding: 10px 18px;
-    border: none;
-    background-color: #e5e7eb;
-    border-radius: 999px;
-    font-size: 1rem;
-    cursor: pointer;
-}
-
-.tab.is-active {
-    background-color: #005792;
-    color: white;
-}
-
-.agenda-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-.toolbar-btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    font-size: 1rem;
-    cursor: pointer;
-    background-color: #e5e7eb;
-}
-
-.toolbar-btn.primary {
-    background-color: #00a3ff;
-    color: white;
-}
-
-.search-input--large {
-    width: 360px;
-}
-
-.agenda-table {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    background-color: transparent;
-    border: none;
-}
-
-.agenda-row {
-    display: grid;
-    grid-template-columns: 140px repeat(4, minmax(0, 1fr));
-    padding: 32px 46px;
-    border-radius: 18px;
-    border: 1px solid #e0e6f0;
-    background-color: #ffffff;
-    align-items: start;
-    column-gap: 80px;
-    row-gap: 22px;
-    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
-}
-
-.agenda-row--head {
-    font-weight: 600;
-    padding: 0 12px 6px;
-    background: none;
-    border-bottom: 1px solid #e0e6f0;
-    border-radius: 0;
-    column-gap: 56px;
-    letter-spacing: 0.03em;
-}
-
-.agenda-row--head span {
-    color: #64748b;
-    font-size: 0.85rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-.agenda-hour {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.hour {
-    font-weight: 700;
-    font-size: 1.2rem;
-}
-
-.agenda-patient .patient-name {
-    font-weight: 700;
-    color: #1a1a1a;
-    font-size: 1.2rem;
-}
-
-.agenda-patient .patient-data {
-    font-size: 1rem;
-    color: #6b7280;
-}
-
-.agenda-status {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.tag {
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    display: inline-flex;
-    align-items: center;
-    width: fit-content;
-}
-
-.tag-waiting {
-    background-color: #e0f2ff;
-    color: #0369a1;
-}
-
-.tag-done {
-    background-color: #dcfce7;
-    color: #15803d;
-}
-
-.tag-note {
-    color: #6b7280;
-    font-size: 0.95rem;
-}
-
-.tag-link {
-    color: #0ea5e9;
-    font-size: 0.95rem;
-    text-decoration: underline;
-}
-
-.agenda-flag .flag {
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 600;
-    color: white;
-}
-
-.flag-debt {
-    background-color: #ef4444;
-}
-
-.flag-diagnostic {
-    background-color: #22c55e;
-}
-
-
-
-/* --- Barra superior  --- */
-.app-bar {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 12px 32px;
-    background-color: #007ab8;
-    color: #fff;
-}
-
-.app-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.brand-logo {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    object-fit: cover;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-}
-
-.brand-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.brand-tagline {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #d9edf7;
-}
-
-.app-search {
-    flex: 1;
-}
-
-.top-search-input {
-    width: 100%;
-    padding: 10px 18px;
-    border-radius: 999px;
-    border: none;
-    font-size: 1rem;
-}
-
-.app-menu {
-    display: flex;
-    gap: 16px;
-    font-size: 0.95rem;
-}
-
-.app-menu a {
-    color: #d9edf7;
-    text-decoration: none;
-    padding-bottom: 4px;
-    border-bottom: 2px solid transparent;
-}
-
-.app-menu a.is-active {
-    border-bottom-color: #fff;
-    color: #fff;
-}
-
-.app-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.pill {
-    border: none;
-    padding: 8px 14px;
-    border-radius: 999px;
-    background-color: #00a3ff;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.pill.ghost {
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-/* Sub barra */
-.app-subbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 32px;
-    background-color: #f7f9fb;
-    border-bottom: 1px solid #dde3ea;
-}
-
-.subbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-}
-
-.badge {
-    background-color: #e6f1ff;
-    color: #005792;
-    padding: 4px 14px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-}
-
-.subbar-tabs {
-    display: flex;
-    gap: 10px;
-}
-
-.subbar-right {
-    display: flex;
-    gap: 10px;
-}
-
-/* Contenedor general */
-.agenda-shell {
-    padding: 25px 32px 40px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(229, 239, 245, 0.6));
-}
-
-.agenda-panel {
-    max-width: 1500px;
-    margin: 0 auto;
-    background-color: rgba(255, 255, 255, 0.96);
-    border-radius: 20px;
-    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
-    overflow: hidden;
-    display: flex;
-}
-
-.sidebar-button {
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #cfd7e6;
-    background-color: #fff;
-    cursor: pointer;
-    font-weight: 600;
-    color: #1f2933;
-}
-
-.agenda-sidebar {
-    width: 320px;
-    background-color: #f4f6fb;
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    border-right: 1px solid #e0e6f0;
-}
-
-.agenda-date-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.date-nav-btn {
-    border: none;
-    background-color: #e3e9f4;
-    color: #1f2937;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    cursor: pointer;
-    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.08);
-}
-
-/* Agenda contenido */
-.agenda-content {
-    flex: 1;
-    padding: 35px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.agenda-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.toolbar-btn.inline {
-    background-color: #f0f2f7;
-}
-
-.hour-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #fff7d6;
-    border-radius: 10px;
-    padding: 6px 12px;
-    font-weight: 700;
-}
-
-.hour-chip.warning {
-    background-color: #ffe1e1;
-}
-
-.hour-arrow {
-    color: #d97706;
-    font-size: 1rem;
-}
-
-.hour-box {
-    background-color: #d7e4ff;
-    color: #1d4ed8;
-    font-size: 0.85rem;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    margin-top: 6px;
-}
-
-/* Ajustes responsivos mínimos */
-@media (max-width: 1200px) {
-    .app-bar,
-    .app-subbar {
-        flex-wrap: wrap;
+/* ==========================================================================
+       ESTILOS GENERALES Y BASE
+       ========================================================================== */
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 18px;
+      background-image: url('assets/Fondo BIDA.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: #1f2933;
+    }
+
+    .logo {
+        max-width: 15%;
+        height: auto;
+        border-radius: 20px;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .logo-small {
+        max-width: 10%;
+        height: auto;
+        border-radius: 20px;
+        position: absolute;
+        top: 30px;
+        left: 30px;
+    }
+
+    .header-bar {
+        background-color: #333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+    }
+    .logo-header {
+        height: 50px;
+    }
+
+    /* ==========================================================================
+       BARRA SUPERIOR APP Y SUBBAR
+       ========================================================================== */
+    .app-bar {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 12px 32px;
+        background-color: #007ab8;
+        color: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .app-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 0 0 auto;
+    }
+
+    .brand-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        object-fit: cover;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .brand-tagline {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #d9edf7;
+    }
+
+    .app-search {
+        flex: 1 1 320px;
+        min-width: 120px;
+    }
+
+    .app-bar .top-search-input {
+        width: 100%;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: none;
+        box-sizing: border-box;
+        font-size: 1rem;
+        max-width: 520px;
+    }
+
+    .app-menu {
+        display: flex;
+        gap: 16px;
+        font-size: 0.95rem;
+        flex: 0 0 auto;
+        overflow-x: auto;
+    }
+
+    .app-menu a {
+        color: #d9edf7;
+        text-decoration: none;
+        padding-bottom: 4px;
+        border-bottom: 2px solid transparent;
+    }
+
+    .app-menu a.is-active {
+        border-bottom-color: #fff;
+        color: #fff;
+    }
+
+    .app-actions {
+        display: flex;
         gap: 10px;
     }
 
+    .pill {
+        border: none;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background-color: #00a3ff;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .pill.ghost {
+        background-color: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    @media (max-width: 1100px) {
+        .app-bar .top-search-input { max-width: 360px; }
+        .brand-name { font-size: 1rem; }
+        .brand-tagline { display: none; }
+        .brand-logo { width: 40px; height: 40px; }
+    }
+
+    @media (max-width: 1000px) {
+        .app-search { flex: 1 1 220px; }
+        .app-bar .top-search-input { max-width: 260px; }
+    }
+
+    @media (max-width: 768px) {
+        .app-bar { padding: 8px 14px; gap: 8px; }
+        .app-bar .top-search-input { display: none; }
+        .app-menu { gap: 8px; }
+        .pill { padding: 6px 10px; font-size: 0.9rem; }
+        .app-actions { gap: 6px; }
+    }
+
+    .app-subbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 32px;
+        background-color: #f7f9fb;
+        border-bottom: 1px solid #dde3ea;
+    }
+
+    .subbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+    }
+
+    .badge {
+        background-color: #e6f1ff;
+        color: #005792;
+        padding: 4px 14px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+    }
+
+    .subbar-tabs {
+        display: flex;
+        gap: 10px;
+    }
+
+    .subbar-right {
+        display: flex;
+        gap: 10px;
+    }
+
+    /* ==========================================================================
+       ESTRUCTURA PRINCIPAL (SHELL Y SIDEBAR)
+       ========================================================================== */
+    .agenda-shell {
+        padding: 25px 32px 40px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(229, 239, 245, 0.6));
+        padding-top: calc(25px + var(--header-height, 72px));
+    }
+
     .agenda-panel {
-        flex-direction: column;
+        max-width: 1500px;
+        margin: 0 auto;
+        background-color: rgba(255, 255, 255, 0.96);
+        border-radius: 20px;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
+        overflow: hidden;
+        display: flex;
     }
 
     .agenda-sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #e0e6f0;
-        flex-direction: row;
-        flex-wrap: wrap;
+        width: 320px;
+        background-color: #f4f6fb;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        border-right: 1px solid #e0e6f0;
     }
 
-    .agenda-content {
+    .sidebar-button {
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid #cfd7e6;
+        background-color: #fff;
+        cursor: pointer;
+        font-weight: 600;
+        color: #1f2933;
+    }
+
+    .agenda-date-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .date-nav-btn {
+        border: none;
+        background-color: #e3e9f4;
+        color: #1f2937;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    .agenda-date-card {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        background-color: white;
+        border-radius: 12px;
         padding: 20px;
+        text-align: center;
+        border: 1px solid #e0e6f0;
+    }
+
+    .agenda-date-number {
+        font-size: 3.2rem;
+        font-weight: bold;
+        color: #005792;
+    }
+
+    .agenda-alert-card {
+        background-color: #fff3d4;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #f1d18a;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .agenda-filter label {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .agenda-select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #cfd7e6;
+    }
+
+    .agenda-status-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .status-item {
+        font-size: 0.9rem;
+        padding-left: 10px;
+        border-left: 4px solid transparent;
+    }
+
+    .status-WhatsApp { border-color: #25d366; }
+    .status-confirmed { border-color: #2b9ccf; }
+    .status-call { border-color: #f7aa00; }
+    .status-new { border-color: #6c63ff; }
+
+    /* ==========================================================================
+       CONTENIDO DE LA AGENDA Y CONTROLES
+       ========================================================================== */
+    .agenda-content {
+        flex: 1;
+        padding: 35px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .agenda-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .agenda-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .toolbar-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        background-color: #e5e7eb;
+    }
+
+    .toolbar-btn.primary {
+        background-color: #00a3ff;
+        color: white;
+    }
+
+    .toolbar-btn.inline {
+        background-color: #f0f2f7;
+    }
+
+    .search-input--large {
+        width: 360px;
+    }
+
+    /* ==========================================================================
+       TABLA / FILAS (¡AQUÍ ESTÁN LOS FIXES!)
+       ========================================================================== */
+    .agenda-table {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background-color: transparent;
+        border: none;
     }
 
     .agenda-row {
-        grid-template-columns: 1fr 1fr;
-        grid-row-gap: 15px;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px;
+        padding: 20px 24px;
+        border-radius: 12px;
+        border: 1px solid #e0e6f0;
+        background-color: #ffffff;
+        align-items: center;
+        column-gap: 12px;
+        row-gap: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        box-sizing: border-box;
+        max-width: 100%;
     }
 
-    .agenda-row--head,
-    .agenda-row span {
-        display: none;
+    .agenda-row--head {
+        font-weight: 600;
+        padding: 0 24px 10px;
+        background: none;
+        border-bottom: 2px solid #e0e6f0;
+        border-radius: 0;
+        grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px;
+        column-gap: 12px;
+        letter-spacing: 0.05em;
+        box-sizing: border-box;
     }
-}
+
+    .agenda-row--head span {
+        color: #64748b;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    /* Columnas internas */
+    .agenda-hour {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .hour-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #fff7d6;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-weight: 700;
+        width: fit-content;
+    }
+
+    .hour-chip.warning {
+        background-color: #ffe1e1;
+    }
+
+    .hour {
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .hour-arrow {
+        color: #d97706;
+        font-size: 1rem;
+    }
+
+    .hour-box {
+        background-color: #d7e4ff;
+        color: #1d4ed8;
+        font-size: 0.85rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        margin-top: 6px;
+        width: fit-content;
+    }
+
+    .agenda-patient .patient-name {
+        font-weight: 700;
+        color: #1a1a1a;
+        font-size: 1.1rem;
+    }
+
+    .agenda-patient .patient-data {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .agenda-doctor p {
+        margin: 0;
+    }
+
+    .agenda-status {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .agenda-flag {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .agenda-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+
+    .agenda-controls,
+    .agenda-table,
+    .agenda-row,
+    .agenda-row--head {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+
+    .tag {
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+    }
+
+    .tag-waiting {
+        background-color: #e0f2ff;
+        color: #0369a1;
+    }
+
+    .tag-done {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+
+    .tag-note {
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    .tag-link {
+        color: #0ea5e9;
+        font-size: 0.95rem;
+        text-decoration: underline;
+    }
+
+    /* Etiquetas de Alertas (Derecha) */
+    .agenda-flag .flag {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        color: white;
+        white-space: nowrap; /* FIX: El texto jamás se partirá de forma extraña */
+        display: inline-block;
+    }
+
+    .flag-debt {
+        background-color: #ef4444;
+    }
+
+    .flag-diagnostic {
+        background-color: #22c55e;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE MODERADO
+       ========================================================================== */
+    @media (max-width: 1200px) {
+        .app-subbar {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .agenda-panel {
+            flex-direction: column;
+        }
+
+        .agenda-sidebar {
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid #e0e6f0;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .agenda-content {
+            padding: 20px;
+        }
+
+        .agenda-row {
+            grid-template-columns: 1fr 1fr;
+            grid-row-gap: 15px;
+        }
+
+        .agenda-row--head {
+            display: none;
+        }
+    }

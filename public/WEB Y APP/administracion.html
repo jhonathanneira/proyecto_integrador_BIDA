@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración - BIDA</title>
+  <link rel="stylesheet" href="administracion.css">
+</head>
+<body>
+  <header class="app-bar">
+    <div class="app-brand">
+      <img src="assets/logo-500x500.png" alt="Logo BIDA" class="brand-logo">
+      <div>
+        <p class="brand-name">BIDA</p>
+      <script src="administracion.js"></script>
+      <script>
+        (function(){
+          function updateHeaderHeight(){
+            var header = document.querySelector('.app-bar');
+            if(!header) return;
+            var h = header.offsetHeight;
+            document.documentElement.style.setProperty('--header-height', h + 'px');
+          }
+          window.addEventListener('load', updateHeaderHeight);
+          window.addEventListener('resize', updateHeaderHeight);
+          // also run shortly after load to catch webfonts/images
+          setTimeout(updateHeaderHeight, 250);
+        })();
+      </script>
+        <p class="brand-tagline">Odontología Especializada</p>
+      </div>
+    </div>
+    <div class="app-search">
+      <input type="text" class="top-search-input" placeholder="Buscar en el sistema...">
+    </div>
+    <nav class="app-menu">
+      <a href="agenda.html">Agenda</a>
+      <a href="#">Pacientes</a>
+      <a href="#" class="is-active">Administración</a>
+      <a href="#">Reportes</a>
+      <a href="#">CRM</a>
+    </nav>
+    <div class="app-actions">
+      <button class="pill">Novedades</button>
+      <button class="pill ghost">Administrador ▾</button>
+    </div>
+  </header>
+
+  <section class="app-subbar">
+    <div class="subbar-left">
+      <span class="subbar-section-title">Panel de Control</span>
+    </div>
+    <div class="subbar-tabs">
+      <button class="tab is-active" data-target="empleados">Empleados</button>
+      <button class="tab" data-target="productos">Productos</button>
+      <button class="tab" data-target="ventas">Ventas</button>
+    </div>
+    <div class="subbar-right">
+      <button class="toolbar-btn primary" id="btn-nuevo">+ Nuevo Registro</button>
+      <button class="toolbar-btn">Exportar</button>
+    </div>
+  </section>
+
+  <div class="admin-shell">
+    <div class="admin-panel">
+      
+      <main class="admin-content active" id="view-empleados">
+        <div class="admin-header">
+          <h2>Gestión de Empleados</h2>
+          <p>Administra el personal médico y administrativo de la clínica.</p>
+        </div>
+        <div class="data-table-container">
+          <div class="data-table-head head-empleados">
+            <span>Nombre Completo</span>
+            <span>Documento</span>
+            <span>Rol y Especialidad</span>
+            <span>Contacto</span>
+            <span>Usuario</span>
+            <span>Acciones</span>
+          </div>
+          <div class="data-table-body" id="tbody-empleados">
+            </div>
+        </div>
+      </main>
+
+      <main class="admin-content" id="view-productos">
+        <div class="admin-header">
+          <h2>Inventario de Productos</h2>
+          <p>Control de insumos y materiales odontológicos.</p>
+        </div>
+        <div class="data-table-container">
+          <div class="data-table-head head-productos">
+            <span>Producto</span>
+            <span>Código de Barra</span>
+            <span>Categoría / Unidad</span>
+            <span>Precios (Compra/Venta)</span>
+            <span>Vencimiento</span>
+            <span>Acciones</span>
+          </div>
+          <div class="data-table-body" id="tbody-productos">
+             </div>
+        </div>
+      </main>
+
+      <main class="admin-content" id="view-ventas">
+        <div class="admin-header">
+          <h2>Registro de Ventas</h2>
+          <p>Historial de transacciones y pagos de pacientes.</p>
+        </div>
+        <div class="data-table-container">
+          <div class="data-table-head head-ventas">
+            <span>ID Venta</span>
+            <span>Fecha y Hora</span>
+            <span>Estado / Método</span>
+            <span>IDs (Emp / Cli)</span>
+            <span>Total a Pagar</span>
+            <span>Acciones</span>
+          </div>
+          <div class="data-table-body" id="tbody-ventas">
+             </div>
+        </div>
+      </main>
+
+    </div>
+  </div>

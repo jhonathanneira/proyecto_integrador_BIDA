@@ -130,7 +130,7 @@
               <a class="tag-link" href="#">Sin motivo</a>
             </div>
             <div class="agenda-flag">
-              <span class="flag flag-debt">⚠ Deudas</span>
+              <span class="flag flag-debt">⚠ Pendiente de Pago</span>
             </div>
           </article>
 
@@ -180,7 +180,7 @@
               <span class="tag-note">Retiro perno</span>
             </div>
             <div class="agenda-flag">
-              <span class="flag flag-debt">⚠ Deudas</span>
+              <span class="flag flag-debt">⚠ Pendiente de Pago</span>
             </div>
           </article>
 
@@ -205,7 +205,7 @@
               <span class="tag-note">Urgencia</span>
             </div>
             <div class="agenda-flag">
-              <span class="flag flag-debt">⚠ Deudas</span>
+              <span class="flag flag-debt">⚠ Pendiente de Pago</span>
             </div>
           </article>
         </section>
@@ -214,5 +214,18 @@
   </div>
 
   <script src="BIDA_agenda.js"></script>
+  <script>
+    (function(){
+      function updateHeaderHeight(){
+        var header = document.querySelector('.app-bar');
+        if(!header) return;
+        var h = header.offsetHeight;
+        document.documentElement.style.setProperty('--header-height', h + 'px');
+      }
+      window.addEventListener('load', updateHeaderHeight);
+      window.addEventListener('resize', updateHeaderHeight);
+      setTimeout(updateHeaderHeight, 250);
+    })();
+  </script>
 </body>
 </html>
