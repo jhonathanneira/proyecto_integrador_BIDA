@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const empleadosPrueba = Array.isArray(window.empleadosBD) ? window.empleadosBD : [];
+    const productosPrueba = Array.isArray(window.productosBD) ? window.productosBD : [];
+    const ventasPrueba = Array.isArray(window.ventasBD) ? window.ventasBD : [];
     
     // 1. Lógica para cambiar entre pestañas (Se mantiene igual)
     const tabs = document.querySelectorAll('.tab');
@@ -16,6 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
             limpiarVista(tab.dataset.target);
         });
     });
+
+    function limpiarVista(modulo) {
+        const tbody = document.getElementById(`tbody-${modulo}`);
+        if (!tbody) return;
+        tbody.innerHTML = '<div class="data-row">Cargando datos...</div>';
+        cargarDatos(modulo);
+    }
 
     // 2. Conexión con tu Backend
     function cargarDatos(modulo) {
@@ -47,19 +57,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function renderizarEmpleadosPrueba() {
         const tbody = document.getElementById('tbody-empleados');
+        if (!empleadosPrueba.length) {
+            tbody.innerHTML = '<div class="data-row">No hay empleados de prueba configurados.</div>';
+            return;
+        }
         
 
-        tbody.innerHTML = empleadosBD.map(emp => `
+        tbody.innerHTML = empleadosPrueba.map(emp => `
             <div class="data-row">
-                <div><div class="main-text">${emp.nombre} ${emp.apellido}</div><div class="sub-text">ID: ${emp.idEmpleado}</div></div>
+                <div><div class="main-text">${emp.idEmpleado || ''}</div></div>
+                <div><div class="main-text">${emp.nombre || ''}</div></div>
+                <div><div class="main-text">${emp.apellido || ''}</div></div>
                 <div><div class="main-text">${emp.documento}</div></div>
-                <div><div class="main-text">${emp.rol || 'N/A'}</div><div class="sub-text">${emp.especialidad || 'General'}</div></div>
-                <div><div class="main-text">${emp.telefono}</div><div class="sub-text">${emp.email}</div></div>
-                <div><span class="status-badge status-active">@${emp.usuario}</span></div>
-                <div class="action-buttons">
-                    <button class="btn-icon">✎</button>
-                    <button class="btn-icon delete">✖</button>
-                </div>
+                <div><div class="main-text">${emp.rol || 'N/A'}</div></div>
+                <div><div class="main-text">${emp.especialidad || ''}</div></div>
+                <div><div class="main-text">${emp.telefono || ''}</div></div>
+                <div><div class="main-text">${emp.email || ''}</div></div>
+                <div><span class="status-badge status-active">@${emp.usuario || ''}</span></div>
             </div>
         `).join('');
     }
@@ -76,15 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML = lista.map(emp => `
             <div class="data-row">
-                <div><div class="main-text">${emp.nombre} ${emp.apellido}</div><div class="sub-text">ID: ${emp.idEmpleado || emp.id || ''}</div></div>
+                <div><div class="main-text">${emp.idEmpleado || emp.id || ''}</div></div>
+                <div><div class="main-text">${emp.nombre || ''}</div></div>
+                <div><div class="main-text">${emp.apellido || ''}</div></div>
                 <div><div class="main-text">${emp.documento || ''}</div></div>
-                <div><div class="main-text">${emp.rol || 'N/A'}</div><div class="sub-text">${emp.especialidad || ''}</div></div>
-                <div><div class="main-text">${emp.telefono || ''}</div><div class="sub-text">${emp.email || ''}</div></div>
+                <div><div class="main-text">${emp.rol || 'N/A'}</div></div>
+                <div><div class="main-text">${emp.especialidad || ''}</div></div>
+                <div><div class="main-text">${emp.telefono || ''}</div></div>
+                <div><div class="main-text">${emp.email || ''}</div></div>
                 <div><span class="status-badge status-active">@${emp.usuario || ''}</span></div>
-                <div class="action-buttons">
-                    <button class="btn-icon">✎</button>
-                    <button class="btn-icon delete">✖</button>
-                </div>
             </div>
         `).join('');
     }
@@ -93,22 +107,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderizarProductosPrueba() {
         const tbody = document.getElementById('tbody-productos');
+        if (!productosPrueba.length) {
+            tbody.innerHTML = '<div class="data-row">No hay productos de prueba configurados.</div>';
+            return;
+        }
        
 
-        tbody.innerHTML = productosBD.map(prod => `
+        tbody.innerHTML = productosPrueba.map(prod => `
             <div class="data-row">
-                <div><div class="main-text">${prod.nombre}</div><div class="sub-text">ID: ${prod.idProducto}</div></div>
+                <div><div class="main-text">${prod.idProducto || ''}</div></div>
+                <div><div class="main-text">${prod.nombre || ''}</div></div>
                 <div><div class="main-text">${prod.codigoBarra}</div></div>
-                <div><div class="main-text">${prod.categoria}</div><div class="sub-text">${prod.unidadMedida}</div></div>
-                <div>
-                    <div class="main-text" style="color: #15803d;">V: $${prod.precioVenta.toLocaleString('es-CO')}</div>
-                    <div class="sub-text">C: $${prod.precioCompra.toLocaleString('es-CO')}</div>
-                </div>
+                <div><div class="main-text" style="color: #15803d;">$${(prod.precioVenta || 0).toLocaleString('es-CO')}</div></div>
+                <div><div class="main-text">$${(prod.precioCompra || 0).toLocaleString('es-CO')}</div></div>
+                <div><div class="main-text">${prod.categoria || ''}</div></div>
+                <div><div class="main-text">${prod.unidadMedida || ''}</div></div>
                 <div><div class="main-text">${prod.fechaVencimiento}</div></div>
-                <div class="action-buttons">
-                    <button class="btn-icon">✎</button>
-                    <button class="btn-icon delete">✖</button>
-                </div>
             </div>
         `).join('');
     }
@@ -123,39 +137,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML = lista.map(prod => `
             <div class="data-row">
-                <div><div class="main-text">${prod.nombre}</div><div class="sub-text">ID: ${prod.idProducto || prod.id || ''}</div></div>
+                <div><div class="main-text">${prod.idProducto || prod.id || ''}</div></div>
+                <div><div class="main-text">${prod.nombre || ''}</div></div>
                 <div><div class="main-text">${prod.codigoBarra || ''}</div></div>
-                <div><div class="main-text">${prod.categoria || ''}</div><div class="sub-text">${prod.unidadMedida || ''}</div></div>
-                <div>
-                    <div class="main-text" style="color: #15803d;">V: $${(prod.precioVenta||0).toLocaleString('es-CO')}</div>
-                    <div class="sub-text">C: $${(prod.precioCompra||0).toLocaleString('es-CO')}</div>
-                </div>
+                <div><div class="main-text" style="color: #15803d;">$${(prod.precioVenta||0).toLocaleString('es-CO')}</div></div>
+                <div><div class="main-text">$${(prod.precioCompra||0).toLocaleString('es-CO')}</div></div>
+                <div><div class="main-text">${prod.categoria || ''}</div></div>
+                <div><div class="main-text">${prod.unidadMedida || ''}</div></div>
                 <div><div class="main-text">${prod.fechaVencimiento || ''}</div></div>
-                <div class="action-buttons">
-                    <button class="btn-icon">✎</button>
-                    <button class="btn-icon delete">✖</button>
-                </div>
             </div>
         `).join('');
     }
 
     function renderizarVentasPrueba() {
         const tbody = document.getElementById('tbody-ventas');
+        if (!ventasPrueba.length) {
+            tbody.innerHTML = '<div class="data-row">No hay ventas de prueba configuradas.</div>';
+            return;
+        }
         
 
-        tbody.innerHTML = ventasBD.map(venta => `
+        tbody.innerHTML = ventasPrueba.map(venta => `
             <div class="data-row">
-                <div><div class="main-text"># V-${venta.idVenta}</div></div>
-                <div><div class="main-text">${venta.fechaHora.split(' ')[0]}</div><div class="sub-text">${venta.fechaHora.split(' ')[1]}</div></div>
-                <div><span class="status-badge status-active">${venta.estado}</span><div class="sub-text">${venta.metodoPago}</div></div>
-                <div><div class="main-text">Emp: ${venta.idEmpleado}</div><div class="sub-text">Cli: ${venta.idCliente}</div></div>
-                <div><div class="main-text" style="font-size: 1.2rem; color: #005792;">$${parseFloat(venta.totalPagar).toLocaleString('es-CO')}</div></div>
-                <div class="action-buttons">
-                    <button class="btn-icon">👁</button>
-                    <button class="btn-icon delete">✖</button>
-                </div>
+                <div><div class="main-text">${venta.idVenta || ''}</div></div>
+                <div><div class="main-text">${venta.fechaHora || ''}</div></div>
+                <div><div class="main-text" style="font-size: 1.1rem; color: #005792;">$${parseFloat(venta.totalPagar || 0).toLocaleString('es-CO')}</div></div>
+                <div><div class="main-text">${venta.metodoPago || ''}</div></div>
+                <div><span class="status-badge status-active">${venta.estado || ''}</span></div>
+                <div><div class="main-text">${venta.idEmpleado || ''}</div></div>
+                <div><div class="main-text">${venta.idCliente || ''}</div></div>
             </div>
         `).join('');
+    }
+
+    const tabActiva = document.querySelector('.tab.is-active');
+    if (tabActiva) {
+        limpiarVista(tabActiva.dataset.target);
     }
 
     function renderizarVentas(data) {
@@ -168,15 +185,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML = lista.map(venta => `
             <div class="data-row">
-                <div><div class="main-text"># V-${venta.idVenta || venta.id || ''}</div></div>
-                <div><div class="main-text">${(venta.fechaHora||'').split(' ')[0] || ''}</div><div class="sub-text">${(venta.fechaHora||'').split(' ')[1] || ''}</div></div>
-                <div><span class="status-badge status-active">${venta.estado || ''}</span><div class="sub-text">${venta.metodoPago || ''}</div></div>
-                <div><div class="main-text">Emp: ${venta.idEmpleado || ''}</div><div class="sub-text">Cli: ${venta.idCliente || ''}</div></div>
-                <div><div class="main-text" style="font-size: 1.2rem; color: #005792;">$${parseFloat(venta.totalPagar||0).toLocaleString('es-CO')}</div></div>
-                <div class="action-buttons">
-                    <button class="btn-icon">👁</button>
-                    <button class="btn-icon delete">✖</button>
-                </div>
+                <div><div class="main-text">${venta.idVenta || venta.id || ''}</div></div>
+                <div><div class="main-text">${venta.fechaHora || ''}</div></div>
+                <div><div class="main-text" style="font-size: 1.1rem; color: #005792;">$${parseFloat(venta.totalPagar||0).toLocaleString('es-CO')}</div></div>
+                <div><div class="main-text">${venta.metodoPago || ''}</div></div>
+                <div><span class="status-badge status-active">${venta.estado || ''}</span></div>
+                <div><div class="main-text">${venta.idEmpleado || ''}</div></div>
+                <div><div class="main-text">${venta.idCliente || ''}</div></div>
             </div>
         `).join('');
     }

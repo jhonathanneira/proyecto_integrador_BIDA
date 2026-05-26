@@ -67,10 +67,31 @@ body {
 .admin-header p { margin: 0; color: #6b7280; font-size: 1rem; }
 
 /* --- TABLAS ESTILO TARJETA (BIDA Style) --- */
-.data-table-container { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.data-table-container { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; overflow-x: auto; }
 .data-table-head { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px; padding: 0 24px 10px; border-bottom: 2px solid #e0e6f0; font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .data-row { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px; align-items: center; padding: 20px 24px; background-color: #ffffff; border: 1px solid #e0e6f0; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
 .data-row:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
+
+/* Estructura específica para empleados con 9 campos */
+.head-empleados,
+#tbody-empleados .data-row {
+    grid-template-columns: 0.7fr 1fr 1fr 1fr 1fr 1.2fr 1fr 1.4fr 1fr;
+    min-width: 1180px;
+}
+
+/* Estructura específica para productos con 8 campos */
+.head-productos,
+#tbody-productos .data-row {
+    grid-template-columns: 0.8fr 1.2fr 1.2fr 1fr 1fr 1fr 1fr 1.2fr;
+    min-width: 1160px;
+}
+
+/* Estructura específica para ventas con 7 campos */
+.head-ventas,
+#tbody-ventas .data-row {
+    grid-template-columns: 0.8fr 1.4fr 1fr 1fr 1fr 0.9fr 0.9fr;
+    min-width: 1050px;
+}
 
 /* --- ELEMENTOS INTERNOS DE LA TABLA --- */
 .main-text { font-weight: 700; color: #1a1a1a; font-size: 1.1rem; }
