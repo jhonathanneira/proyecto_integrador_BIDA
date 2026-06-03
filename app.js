@@ -91,3 +91,7 @@ connection.connect(function (error) {
  app.use('/app', empleadoRoutes(connection));
  app.use('/app', ventaRoutes(connection));
  
+
+ // ... todo tu código de express, rutas de productos, etc.
+
+module.exports = app;
