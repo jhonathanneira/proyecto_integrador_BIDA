@@ -25,8 +25,8 @@ ruta.get('/empleado', (req, res)=>{
         
         res.status(200).json({
             mensaje: 'lista de empleados obtenidos exitosamente',
-            total: empleados.length,
-            empleados
+            total: empleado.length,
+            empleados: empleado
         });
     });
     });
@@ -115,7 +115,7 @@ ruta.post('/empleado', (req, res) => {
 // ==========================================================
 
 
-ruta.put('/empleados/:id', (req, res) => {
+ruta.put('/empleado/:id', (req, res) => {
     // 1_ Obtenemos el ID del empleado
     const empleadoId = req.params.id;
 
@@ -175,7 +175,7 @@ ruta.put('/empleados/:id', (req, res) => {
 // ==========================================================
 
 
-ruta.delete('/empleados/:id', (req, res) => {
+ruta.delete('/empleado/:id', (req, res) => {
     const empleadoId = req.params.id;
 
     const sql = 'DELETE FROM empleado WHERE idEmpleado = ?';

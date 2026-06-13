@@ -48,50 +48,36 @@ app.use((req, res, next) => {
 
 var puerto = 3000;
 
-//probamos la conexión con servidor local
-
-app.listen('3000', function () {
-    console.log('conexión con servidor ok')
-});
-
-//crear la primera ruta de acceso con método get
-
-app.get('/', function (req, res) {
-    res.send('primera ruta de inicio');
-});
- 
-//definimos los parámetros de conexión a la base de datos 
-
+// DEFINIMOS LOS PARÁMETROS DE CONEXIÓN A LA BASE DE DATOS 
 var connection = mysql.createConnection({
-    host:'localhost', 
+    host: 'localhost', 
     user: 'root',
     password: '',
     database: 'bida', 
     port: 3308
-})  
+});
 
-//probamos la conexión a la base de datos
+// EVITAR QUE LEVANTE EL PUERTO Y CONEXIÓN REAL SI ESTAMOS EN NUESTRAS PRUEBAS (JEST)
+if (process.env.NODE_ENV !== 'test') {
+    // Probamos la conexión con servidor local
+    app.listen(puerto, function () {
+        console.log('Conexión con servidor ok en el puerto ' + puerto);
+    });
 
-connection.connect(function (error) {
-    if (error) {
-        throw error;
-    } else {
-    console.log('Conexión exitosa a la base de datos')
-    }
-})
+    // Probamos la conexión real a la base de datos
+    connection.connect(function (error) {
+        if (error) {
+            throw error;
+        } else {
+            console.log('Conexión exitosa a la base de datos');
+        }
+    });
+}
 
+// CONEXIÓN DE RUTAS (Pasamos la conexión de mysql)
+app.use('/app', productoRoutes(connection));
+app.use('/app', empleadoRoutes(connection));
+app.use('/app', ventaRoutes(connection));
 
-
-
-
-// conexión de rutas
-
-
- app.use('/app', productoRoutes(connection));
- app.use('/app', empleadoRoutes(connection));
- app.use('/app', ventaRoutes(connection));
- 
-
- // ... todo tu código de express, rutas de productos, etc.
-
+// EXPORTAMOS LA APP
 module.exports = app;
