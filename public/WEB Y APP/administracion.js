@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const btnLogout = document.getElementById('btn-logout');
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            sessionStorage.removeItem('empleado');
+            window.location.href = 'BIDA_Inicio de sesion_login.html';
+        });
+    }
+
     const empleadosPrueba = Array.isArray(window.empleadosBD) ? window.empleadosBD : [];
     const productosPrueba = Array.isArray(window.productosBD) ? window.productosBD : [];
     const ventasPrueba = Array.isArray(window.ventasBD) ? window.ventasBD : [];

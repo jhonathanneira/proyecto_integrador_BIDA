@@ -15,6 +15,7 @@ app.use(express.text({ type: '*/*' }));
 app.use(cors());
 // También aceptar JSON estándar
 app.use(express.json());
+app.use(cors());
 app.use((req, res, next) => {
     const raw = req.body;
     if (!raw || typeof raw !== 'string') {

@@ -200,17 +200,56 @@ ruta.delete('/empleado/:id', (req, res) => {
     });
 });
 
+// ==========================================================
+// METODO PARA EL INICIO DE SESION - LOGIN (POST /api/empleados/login)
+// ==========================================================
 
+ruta.post('/empleado/login', (req, res) => {
+    const { usuario, password } = req.body;
 
+    if (!usuario || !password) {
+        return res.status(400).json({
+            mensaje: 'Faltan datos obligatorios para iniciar sesión'
+        });
+    }   
 
+    const sql = 'SELECT idEmpleado, nombre, usuario, password FROM empleado WHERE usuario = ? AND password = ?';
+    
+    connection.query(sql, [usuario, password], (error, resultado) => {
+        if (error) {
+            console.error('Error al iniciar sesión:', error);
+            return res.status(500).json({
+                success: false,
+                mensaje: 'Error interno del servidor al iniciar sesión'
+            });
+        }
 
+        if (resultado.length === 0) {
+            return res.status(401).json({
+                success: false,
+                mensaje: 'Usuario o contraseña incorrectos'
+            });
+        }
 
+        const empleado = resultado[0];
 
+        if (empleado.password !== password) {
+            return res.status(401).json({
+                success: false,
+                mensaje: 'Usuario o contraseña incorrectos'
+            });
+        } 
 
-return ruta;
+        delete empleado.password;
 
-}
+        res.status(200).json({
+            success: true,
+            mensaje: 'Inicio de sesión exitoso',
+            user: empleado
+        });
+    });
+});
 
-
-
+    return ruta;
+};
 
