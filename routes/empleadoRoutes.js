@@ -206,16 +206,17 @@ ruta.delete('/empleado/:id', (req, res) => {
 
 ruta.post('/empleado/login', (req, res) => {
     const { usuario, password } = req.body;
+    const credencial = (usuario || '').trim();
 
-    if (!usuario || !password) {
+    if (!credencial || !password) {
         return res.status(400).json({
-            mensaje: 'Faltan datos obligatorios para iniciar sesión'
+            mensaje: 'Usuario y contraseña son requeridos para iniciar sesión'
         });
     }   
 
-    const sql = 'SELECT idEmpleado, nombre, usuario, password FROM empleado WHERE usuario = ? AND password = ?';
+    const sql = 'SELECT idEmpleado, nombre, usuario, email FROM empleado WHERE (usuario = ? OR email = ?) AND PASSWORD = ?';
     
-    connection.query(sql, [usuario, password], (error, resultado) => {
+    connection.query(sql, [credencial, credencial, password], (error, resultado) => {
         if (error) {
             console.error('Error al iniciar sesión:', error);
             return res.status(500).json({
@@ -232,15 +233,6 @@ ruta.post('/empleado/login', (req, res) => {
         }
 
         const empleado = resultado[0];
-
-        if (empleado.password !== password) {
-            return res.status(401).json({
-                success: false,
-                mensaje: 'Usuario o contraseña incorrectos'
-            });
-        } 
-
-        delete empleado.password;
 
         res.status(200).json({
             success: true,
