@@ -12,54 +12,24 @@
       <img src="assets/logo-500x500.png" alt="Logo BIDA" class="brand-logo">
       <div>
         <p class="brand-name">BIDA</p>
-      <script src="administracion.js"></script>
-      <script>
-        (function(){
-          function updateHeaderHeight(){
-            var header = document.querySelector('.app-bar');
-            if(!header) return;
-            var h = header.offsetHeight;
-            document.documentElement.style.setProperty('--header-height', h + 'px');
-          }
-          window.addEventListener('load', updateHeaderHeight);
-          window.addEventListener('resize', updateHeaderHeight);
-          // also run shortly after load to catch webfonts/images
-          setTimeout(updateHeaderHeight, 250);
-        })();
-      </script>
         <p class="brand-tagline">Odontología Especializada</p>
       </div>
     </div>
     <div class="app-search">
       <input type="text" class="top-search-input" placeholder="Buscar en el sistema...">
     </div>
-    <nav class="app-menu">
-      <a href="agenda.html">Agenda</a>
-      <a href="#">Pacientes</a>
-      <a href="#" class="is-active">Administración</a>
-      <a href="#">Reportes</a>
-      <a href="#">CRM</a>
-    </nav>
     <div class="app-actions">
       <button class="pill">Novedades</button>
-      <button class="pill ghost">Administrador ▾</button>
       <button class="pill ghost" id="btn-logout" type="button">Cerrar sesión</button>
     </div>
   </header>
 
   <section class="app-subbar">
-    <div class="subbar-left">
-      <span class="subbar-section-title">Panel de Control</span>
-    </div>
-    <div class="subbar-tabs">
-      <button class="tab is-active" data-target="empleados">Empleados</button>
-      <button class="tab" data-target="productos">Productos</button>
-      <button class="tab" data-target="ventas">Ventas</button>
-    </div>
-    <div class="subbar-right">
-      <button class="toolbar-btn primary" id="btn-nuevo">+ Nuevo Registro</button>
-      <button class="toolbar-btn">Exportar</button>
-    </div>
+    <nav class="subbar-menu" aria-label="Accesos rápidos">
+      <a class="tab is-active" href="BIDA_agenda.html">Agenda</a>
+      <a class="tab" href="../js/productos.html">Productos</a>
+      <a class="tab" href="../js/ventas.html">Ventas</a>
+    </nav>
   </section>
 
   <div class="admin-shell">
@@ -83,50 +53,26 @@
             <span>Usuario</span>
           </div>
           <div class="data-table-body" id="tbody-empleados">
-            </div>
-        </div>
-      </main>
-
-      <main class="admin-content" id="view-productos">
-        <div class="admin-header">
-          <h2>Inventario de Productos</h2>
-          <p>Control de insumos y materiales odontológicos.</p>
-        </div>
-        <div class="data-table-container">
-          <div class="data-table-head head-productos">
-            <span>ID Producto</span>
-            <span>Nombre</span>
-            <span>Código de Barras</span>
-            <span>Precio Venta</span>
-            <span>Precio Compra</span>
-            <span>Categoría</span>
-            <span>Unidad de Medida</span>
-            <span>Fecha de Vencimiento</span>
-          </div>
-          <div class="data-table-body" id="tbody-productos">
-             </div>
-        </div>
-      </main>
-
-      <main class="admin-content" id="view-ventas">
-        <div class="admin-header">
-          <h2>Registro de Ventas</h2>
-          <p>Historial de transacciones y pagos de pacientes.</p>
-        </div>
-        <div class="data-table-container">
-          <div class="data-table-head head-ventas">
-            <span>ID Venta</span>
-            <span>Fecha y Hora</span>
-            <span>Total a Pagar</span>
-            <span>Método de Pago</span>
-            <span>Estado</span>
-            <span>ID Empleado</span>
-            <span>ID Cliente</span>
-          </div>
-          <div class="data-table-body" id="tbody-ventas">
              </div>
         </div>
       </main>
 
     </div>
   </div>
+
+  <script src="administracion.js"></script>
+  <script>
+    (function(){
+      function updateHeaderHeight(){
+        var header = document.querySelector('.app-bar');
+        if(!header) return;
+        var h = header.offsetHeight;
+        document.documentElement.style.setProperty('--header-height', h + 'px');
+      }
+      window.addEventListener('load', updateHeaderHeight);
+      window.addEventListener('resize', updateHeaderHeight);
+      setTimeout(updateHeaderHeight, 250);
+    })();
+  </script>
+</body>
+</html>

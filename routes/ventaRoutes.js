@@ -101,6 +101,40 @@ module.exports = (db) => {
     });
 
     //===================================
+    // metodo get para listar todas las ventas registradas
+    //===================================
+
+    ruta.get('/venta', (req, res) => {
+        const sql = `
+            SELECT 
+                V.idVenta,
+                V.fechaHora,
+                V.totalPagar,
+                V.metodoPago,
+                V.estado,
+                V.idEmpleado,
+                V.idCliente,
+                E.nombre AS nombreEmpleado,
+                C.nombre AS nombreCliente
+            FROM venta V
+            LEFT JOIN empleado E ON V.idEmpleado = E.idEmpleado
+            LEFT JOIN cliente C ON V.idCliente = C.idCliente
+            ORDER BY V.idVenta DESC`;
+
+        db.query(sql, (error, filas) => {
+            if (error) {
+                console.error('Error al listar ventas:', error);
+                return res.status(500).send({
+                    mensaje: 'Error al listar ventas',
+                    errorDetails: error.sqlMessage || error.code
+                });
+            }
+
+            return res.status(200).send(filas);
+        });
+    });
+
+    //===================================
     //metodo get para consultar detalle de una venta por su id
     //===================================
 

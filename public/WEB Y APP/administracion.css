@@ -18,7 +18,7 @@ body {
 .app-search { flex: 1 1 320px; min-width: 120px; }
 .top-search-input { width: 100%; padding: 10px 18px; border-radius: 999px; border: none; box-sizing: border-box; }
 .app-menu { display: flex; gap: 16px; font-size: 0.95rem; flex: 0 0 auto; }
-.app-menu { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.app-menu { overflow-x: auto; }
 .top-search-input { max-width: 520px; }
 .app-menu { flex-shrink: 0; }
 
@@ -49,14 +49,16 @@ body {
 .pill { border: none; padding: 8px 14px; border-radius: 999px; background-color: #00a3ff; color: #fff; font-weight: 600; cursor: pointer; }
 .pill.ghost { background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.6); }
 
-/* --- SUBBAR --- */
-.app-subbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background-color: #ffffff; border-bottom: 1px solid #dde3ea; }
-.subbar-section-title { font-weight: 600; font-size: 1.2rem; color: #1a1a1a; }
-.subbar-tabs { display: flex; gap: 10px; }
+.app-subbar { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 12px 32px; background-color: #ffffff; border-bottom: 1px solid #dde3ea; }
+.subbar-menu { display: flex; flex: 1 1 auto; justify-content: center; gap: 14px; overflow-x: auto; }
 .tab { padding: 8px 18px; border: none; background-color: #e5e7eb; border-radius: 999px; font-size: 0.95rem; cursor: pointer; color: #4b5563; font-weight: 500; transition: all 0.2s;}
+.subbar-menu .tab { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; text-decoration: none; }
 .tab.is-active { background-color: #005792; color: white; }
-.toolbar-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid #cfd7e6; background-color: #fff; cursor: pointer; font-weight: 600; }
-.toolbar-btn.primary { background-color: #00a3ff; color: white; border: none; }
+
+@media (max-width: 1100px) {
+    .app-subbar { flex-wrap: wrap; }
+    .subbar-menu { flex: 1 1 100%; }
+}
 
 /* --- CONTENEDOR PRINCIPAL ADMINISTRACIÓN --- */
 .admin-shell { padding: 30px 40px; padding-top: calc(30px + var(--header-height, 72px)); }
@@ -72,25 +74,12 @@ body {
 .data-row { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px; align-items: center; padding: 20px 24px; background-color: #ffffff; border: 1px solid #e0e6f0; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
 .data-row:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
 
+
 /* Estructura específica para empleados con 9 campos */
 .head-empleados,
 #tbody-empleados .data-row {
     grid-template-columns: 0.7fr 1fr 1fr 1fr 1fr 1.2fr 1fr 1.4fr 1fr;
     min-width: 1180px;
-}
-
-/* Estructura específica para productos con 8 campos */
-.head-productos,
-#tbody-productos .data-row {
-    grid-template-columns: 0.8fr 1.2fr 1.2fr 1fr 1fr 1fr 1fr 1.2fr;
-    min-width: 1160px;
-}
-
-/* Estructura específica para ventas con 7 campos */
-.head-ventas,
-#tbody-ventas .data-row {
-    grid-template-columns: 0.8fr 1.4fr 1fr 1fr 1fr 0.9fr 0.9fr;
-    min-width: 1050px;
 }
 
 /* --- ELEMENTOS INTERNOS DE LA TABLA --- */

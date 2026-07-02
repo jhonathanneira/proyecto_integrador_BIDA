@@ -1,0 +1,6 @@
+/* Estructura específica para productos con 8 campos */
+.head-productos,
+#tbody-productos .data-row {
+    grid-template-columns: 0.8fr 1.2fr 1.2fr 1fr 1fr 1fr 1fr 1.2fr;
+    min-width: 1160px;
+}

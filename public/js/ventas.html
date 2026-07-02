@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ventas - BIDA</title>
+  <link rel="stylesheet" href="../WEB Y APP/administracion.css">
+  <link rel="stylesheet" href="ventas.css">
+</head>
+<body>
+  <header class="app-bar">
+    <div class="app-brand">
+      <img src="../WEB Y APP/assets/logo-500x500.png" alt="Logo BIDA" class="brand-logo">
+      <div>
+        <p class="brand-name">BIDA</p>
+        <script src="../WEB Y APP/administracion.js"></script>
+        <script>
+          (function(){
+            function updateHeaderHeight(){
+              var header = document.querySelector('.app-bar');
+              if(!header) return;
+              var h = header.offsetHeight;
+              document.documentElement.style.setProperty('--header-height', h + 'px');
+            }
+            window.addEventListener('load', updateHeaderHeight);
+            window.addEventListener('resize', updateHeaderHeight);
+            setTimeout(updateHeaderHeight, 250);
+          })();
+        </script>
+        <p class="brand-tagline">Odontología Especializada</p>
+      </div>
+    </div>
+    <div class="app-search">
+      <input type="text" class="top-search-input" placeholder="Buscar en el sistema...">
+    </div>
+    <div class="app-actions">
+      <button class="pill">Novedades</button>
+      <button class="pill ghost" id="btn-logout" type="button">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <section class="app-subbar">
+    <nav class="subbar-menu" aria-label="Navegación de módulos">
+      <a class="tab" href="../WEB Y APP/BIDA_agenda.html">Agenda</a>
+      <a class="tab" href="productos.html">Productos</a>
+      <a class="tab is-active" href="ventas.html">Ventas</a>
+    </nav>
+  </section>
+
+  <section class="app-subbar">
+    <div class="subbar-left">
+      <span class="subbar-section-title">Registro de Ventas</span>
+    </div>
+    <div class="subbar-right">
+      <button class="toolbar-btn primary" id="btn-nuevo">+ Nueva Venta</button>
+      <button class="toolbar-btn">Exportar</button>
+    </div>
+  </section>
+
+  <div class="admin-shell">
+    <div class="admin-panel">
+      <main class="admin-content active" id="view-ventas">
+        <div class="admin-header">
+          <h2>Registro de Ventas</h2>
+          <p>Historial de transacciones y pagos de pacientes.</p>
+        </div>
+        <div class="data-table-container">
+          <div class="data-table-head head-ventas">
+            <span>ID Venta</span>
+            <span>Fecha y Hora</span>
+            <span>Total a Pagar</span>
+            <span>Método de Pago</span>
+            <span>Estado</span>
+            <span>ID Empleado</span>
+            <span>ID Cliente</span>
+          </div>
+          <div class="data-table-body" id="tbody-ventas">
+             </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="ventas.js"></script>
+</body>
+</html>

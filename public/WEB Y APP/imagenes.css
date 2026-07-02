@@ -168,6 +168,37 @@
         border-bottom: 1px solid #dde3ea;
     }
 
+    .module-nav {
+        justify-content: center;
+    }
+
+    .module-nav .subbar-menu {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+    }
+
+    .module-nav .tab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+        padding: 8px 18px;
+        border-radius: 999px;
+        background-color: #e5e7eb;
+        color: #4b5563;
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+    .module-nav .tab.is-active {
+        background-color: #005792;
+        color: #fff;
+    }
+
     .subbar-left {
         display: flex;
         align-items: center;
