@@ -3,48 +3,58 @@ document.addEventListener("DOMContentLoaded", () => {
     cargarProductos();
 });
 
-//Funcion que Llama a la API GET /app/productos.
+//Funcion que Llama a la API GET /app/producto.
 function cargarProductos() {
-    fetch("http://localhost:3000/app/productos")
-        .then(res => res.json())
-        .then(productos => {
+    const tablaBody = document.getElementById("tbody-productos");
 
-            // VALIDACIÓN DE SEGURIDAD - Valida que la respuesta sea un array.
+    if (!tablaBody) {
+        console.error("No se encontró el contenedor tbody-productos.");
+        return;
+    }
+
+    tablaBody.innerHTML = '<div class="data-row">Cargando datos...</div>';
+
+    fetch("http://localhost:3000/app/producto")
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            return res.json();
+        })
+        .then(productos => {
             if (!Array.isArray(productos)) {
                 console.error("La API no devolvió un array:", productos);
+                tablaBody.innerHTML = '<div class="data-row">No se pudieron cargar los productos.</div>';
                 return;
             }
 
-            const tablaBody = document.querySelector("#tablaProductos tbody");
+            if (productos.length === 0) {
+                tablaBody.innerHTML = '<div class="data-row">No hay productos registrados.</div>';
+                return;
+            }
 
-            tablaBody.innerHTML = ""; // limpiar por si se recarga
-
-            //Limpia la tabla y crea filas <tr> con los datos de cada producto.
-            productos.forEach(prod => {
-                const fila = document.createElement("tr");
-
-                fila.innerHTML = `
-    <td>${prod.idProducto}</td>
-    <td>${prod.nombre}</td>
-    <td>${prod.codigoBarra}</td>
-    <td>${prod.precioVenta}</td>
-    <td>${prod.precioCompra}</td>
-    <td>${prod.categoria}</td>
-    <td>${prod.unidadMedida}</td>
-    <td>${formatearFecha(prod.fechaVencimiento)}</td>
-    <td>
-        <button class="btn-editar" onclick="editarProducto(${prod.idProducto})">Editar</button>
-        <button class="btn-eliminar" onclick="eliminarProducto(${prod.idProducto})">Eliminar</button>
-    </td>
-`;
-//Agregamos la fila a la tabla
-tablaBody.appendChild(fila);
-
-});
-    })
-    .catch(err => {
-        console.error("Error al conectar con la API:", err);
-    });
+            tablaBody.innerHTML = productos.map(prod => `
+                <div class="data-row">
+                    <div><div class="main-text">${prod.idProducto ?? ''}</div></div>
+                    <div><div class="main-text">${prod.nombre ?? ''}</div></div>
+                    <div><div class="main-text">${prod.codigoBarra ?? ''}</div></div>
+                    <div><div class="main-text">${Number(prod.precioVenta || 0).toLocaleString('es-CO')}</div></div>
+                    <div><div class="main-text">${Number(prod.precioCompra || 0).toLocaleString('es-CO')}</div></div>
+                    <div><div class="main-text">${prod.categoria ?? ''}</div></div>
+                    <div><div class="main-text">${prod.unidadMedida ?? ''}</div></div>
+                    <div><div class="main-text">${prod.fechaVencimiento ? formatearFecha(prod.fechaVencimiento) : ''}</div></div>
+                    <div>
+                        <button class="btn-editar" onclick="editarProducto(${prod.idProducto})">Editar</button>
+                        <button class="btn-eliminar" onclick="eliminarProducto(${prod.idProducto})">Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        })
+        .catch(err => {
+            console.error("Error al conectar con la API:", err);
+            tablaBody.innerHTML = '<div class="data-row">Error al cargar productos.</div>';
+        });
 }
 
 //Formatea la fecha de vencimiento para mostrarse en formato es-CO.
@@ -66,7 +76,7 @@ function formatearFecha(fecha) {
 
 async function eliminarProducto(idProducto) {
     try {
-        const response = await fetch(`http://localhost:3000/app/productos/${idProducto}`, {
+        const response = await fetch(`http://localhost:3000/app/producto/${idProducto}`, {
             method: 'DELETE'
         });
 

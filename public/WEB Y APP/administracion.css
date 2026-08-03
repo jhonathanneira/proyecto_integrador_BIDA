@@ -48,12 +48,39 @@ body {
 .app-actions { display: flex; gap: 10px; }
 .pill { border: none; padding: 8px 14px; border-radius: 999px; background-color: #00a3ff; color: #fff; font-weight: 600; cursor: pointer; }
 .pill.ghost { background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.6); }
+.toolbar-btn {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 9px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.toolbar-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.toolbar-btn.primary {
+    background: #005792;
+    border-color: #005792;
+    color: #fff;
+}
+
+.toolbar-btn.primary:hover {
+    background: #004a7c;
+}
 
 .app-subbar { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 12px 32px; background-color: #ffffff; border-bottom: 1px solid #dde3ea; }
 .subbar-menu { display: flex; flex: 1 1 auto; justify-content: center; gap: 14px; overflow-x: auto; }
 .tab { padding: 8px 18px; border: none; background-color: #e5e7eb; border-radius: 999px; font-size: 0.95rem; cursor: pointer; color: #4b5563; font-weight: 500; transition: all 0.2s;}
 .subbar-menu .tab { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; text-decoration: none; }
+.subbar-menu .tab:focus-visible { outline: 3px solid rgba(0, 87, 146, 0.28); outline-offset: 2px; }
 .tab.is-active { background-color: #005792; color: white; }
+.admin-tab { appearance: none; }
 
 @media (max-width: 1100px) {
     .app-subbar { flex-wrap: wrap; }
@@ -82,6 +109,27 @@ body {
     min-width: 1180px;
 }
 
+/* Estructura específica para agenda con 7 campos */
+.head-agenda,
+#tbody-agenda .data-row {
+    grid-template-columns: 0.9fr 0.8fr 1.5fr 1.4fr 1.3fr 1fr 120px;
+    min-width: 1240px;
+}
+
+/* Estructura específica para productos con 9 campos */
+.head-productos,
+#tbody-productos .data-row {
+    grid-template-columns: 0.8fr 1.2fr 1.2fr 1fr 1fr 1fr 1fr 1.2fr 120px;
+    min-width: 1280px;
+}
+
+/* Estructura específica para ventas con 7 campos */
+.head-ventas,
+#tbody-ventas .data-row {
+    grid-template-columns: 0.8fr 1.4fr 1fr 1fr 1fr 0.9fr 0.9fr;
+    min-width: 1050px;
+}
+
 /* --- ELEMENTOS INTERNOS DE LA TABLA --- */
 .main-text { font-weight: 700; color: #1a1a1a; font-size: 1.1rem; }
 .sub-text { color: #6b7280; font-size: 0.9rem; margin-top: 4px; }
@@ -94,3 +142,188 @@ body {
 .btn-icon { background: #f0f2f7; border: none; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; color: #4b5563; font-weight: bold; transition: background 0.2s; }
 .btn-icon:hover { background: #e0e6f0; color: #005792; }
 .btn-icon.delete:hover { background: #fee2e2; color: #ef4444; }
+
+.agenda-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 16px 18px;
+    border: 1px solid #dbe4ef;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.agenda-summary-bar strong {
+    display: block;
+    font-size: 1.5rem;
+    color: #005792;
+}
+
+.summary-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.agenda-summary-actions {
+    margin-left: auto;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 2500;
+}
+
+.modal-backdrop.is-open {
+    display: flex;
+}
+
+.modal-card {
+    width: min(100%, 760px);
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+}
+
+.modal-card-large {
+    width: min(100%, 760px);
+}
+
+.modal-card-small {
+    width: min(100%, 420px);
+}
+
+.modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.modal-eyebrow {
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #005792;
+}
+
+.modal-eyebrow.danger {
+    color: #b91c1c;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    color: #0f172a;
+}
+
+.modal-close {
+    border: none;
+    background: #f1f5f9;
+    color: #0f172a;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modal-form {
+    display: grid;
+    gap: 10px;
+}
+
+.modal-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+}
+
+.modal-form-grid label,
+.modal-form-grid .modal-message,
+.modal-form-grid .modal-actions {
+    grid-column: 1 / -1;
+}
+
+.modal-form label {
+    font-weight: 700;
+    color: #334155;
+    margin-top: 4px;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    font: inherit;
+    background-color: #fff;
+}
+
+.modal-form textarea {
+    resize: vertical;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+    outline: none;
+    border-color: #005792;
+    box-shadow: 0 0 0 3px rgba(0, 87, 146, 0.15);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.modal-actions-wide {
+    margin-top: 6px;
+}
+
+.modal-message {
+    min-height: 1.2em;
+    margin: 4px 0 0;
+    font-weight: 600;
+}
+
+.modal-message-wide {
+    margin-top: 2px;
+}
+
+.modal-confirm-text {
+    margin: 0 0 18px;
+    color: #334155;
+    line-height: 1.5;
+}
+
+.toolbar-btn.danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.toolbar-btn.danger:hover {
+    background: #b91c1c;
+}

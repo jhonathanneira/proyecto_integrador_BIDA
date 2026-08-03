@@ -4,6 +4,7 @@ const cors = require ('cors');
 const productoRoutes = require('./routes/productoRoutes');
 const empleadoRoutes = require('./routes/empleadoRoutes');
 const ventaRoutes = require('./routes/ventaRoutes');
+const agendaRoutes = require('./routes/agendaRoutes');
 
 
 var app = express();
@@ -60,17 +61,43 @@ var connection = mysql.createConnection({
 
 // EVITAR QUE LEVANTE EL PUERTO Y CONEXIÓN REAL SI ESTAMOS EN NUESTRAS PRUEBAS (JEST)
 if (process.env.NODE_ENV !== 'test') {
-    // Probamos la conexión con servidor local
-    app.listen(puerto, function () {
-        console.log('Conexión con servidor ok en el puerto ' + puerto);
-    });
-
     // Probamos la conexión real a la base de datos
     connection.connect(function (error) {
         if (error) {
             throw error;
         } else {
             console.log('Conexión exitosa a la base de datos');
+
+            const sqlAgenda = `
+                CREATE TABLE IF NOT EXISTS cita (
+                    idCita INT AUTO_INCREMENT PRIMARY KEY,
+                    fecha DATE NOT NULL,
+                    hora TIME NOT NULL,
+                    paciente VARCHAR(150) NOT NULL,
+                    documento VARCHAR(30) DEFAULT NULL,
+                    telefono VARCHAR(30) DEFAULT NULL,
+                    idEmpleado INT DEFAULT NULL,
+                    tratamiento VARCHAR(150) NOT NULL,
+                    estado VARCHAR(30) NOT NULL DEFAULT 'Programada',
+                    observacion TEXT DEFAULT NULL,
+                    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    CONSTRAINT fk_cita_empleado
+                        FOREIGN KEY (idEmpleado) REFERENCES empleado(idEmpleado)
+                        ON UPDATE CASCADE
+                        ON DELETE SET NULL
+                )
+            `;
+
+            connection.query(sqlAgenda, (agendaError) => {
+                if (agendaError) {
+                    throw agendaError;
+                }
+
+                // Probamos la conexión con servidor local
+                app.listen(puerto, function () {
+                    console.log('Conexión con servidor ok en el puerto ' + puerto);
+                });
+            });
         }
     });
 }
@@ -79,6 +106,7 @@ if (process.env.NODE_ENV !== 'test') {
 app.use('/app', productoRoutes(connection));
 app.use('/app', empleadoRoutes(connection));
 app.use('/app', ventaRoutes(connection));
+app.use('/app', agendaRoutes(connection));
 
 // EXPORTAMOS LA APP
 module.exports = app;

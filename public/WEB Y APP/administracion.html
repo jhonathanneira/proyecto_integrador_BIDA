@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administración - BIDA</title>
   <link rel="stylesheet" href="administracion.css">
+  <link rel="stylesheet" href="../css/fondo-global.css">
 </head>
 <body>
   <header class="app-bar">
@@ -25,20 +26,52 @@
   </header>
 
   <section class="app-subbar">
-    <nav class="subbar-menu" aria-label="Accesos rápidos">
-      <a class="tab is-active" href="BIDA_agenda.html">Agenda</a>
-      <a class="tab" href="../js/productos.html">Productos</a>
-      <a class="tab" href="../js/ventas.html">Ventas</a>
+    <nav class="subbar-menu" aria-label="Módulos de administración">
+      <button class="tab is-active admin-tab" type="button" data-target="agenda">Agenda</button>
+      <button class="tab admin-tab" type="button" data-target="empleados">Empleados</button>
+      <button class="tab admin-tab" type="button" data-target="productos">Productos</button>
+      <button class="tab admin-tab" type="button" data-target="ventas">Ventas</button>
     </nav>
   </section>
 
   <div class="admin-shell">
     <div class="admin-panel">
-      
+      <main class="admin-content active" id="view-agenda">
+        <div class="admin-header">
+          <h2>Agenda Odontológica</h2>
+          <p>Programa, consulta y administra las citas de la clínica desde la base de datos.</p>
+        </div>
+        <div class="agenda-summary-bar">
+          <div>
+            <span class="summary-label">Citas registradas</span>
+            <strong id="agenda-total-citas">0</strong>
+          </div>
+          <div>
+            <span class="summary-label">Pendientes hoy</span>
+            <strong id="agenda-pendientes-hoy">0</strong>
+          </div>
+          <div class="agenda-summary-actions">
+            <button class="toolbar-btn primary" id="btn-nueva-cita" type="button">+ Nueva cita</button>
+          </div>
+        </div>
+        <div class="data-table-container">
+          <div class="data-table-head head-agenda">
+            <span>Fecha</span>
+            <span>Hora</span>
+            <span>Paciente</span>
+            <span>Profesional</span>
+            <span>Tratamiento</span>
+            <span>Estado</span>
+            <span>Acciones</span>
+          </div>
+          <div class="data-table-body" id="tbody-agenda"></div>
+        </div>
+      </main>
+
       <main class="admin-content active" id="view-empleados">
         <div class="admin-header">
           <h2>Gestión de Empleados</h2>
-          <p>Administra el personal médico y administrativo de la clínica.</p>
+          <p>Consulta el personal médico y administrativo registrado en la base de datos.</p>
         </div>
         <div class="data-table-container">
           <div class="data-table-head head-empleados">
@@ -52,11 +85,128 @@
             <span>Email</span>
             <span>Usuario</span>
           </div>
-          <div class="data-table-body" id="tbody-empleados">
-             </div>
+          <div class="data-table-body" id="tbody-empleados"></div>
         </div>
       </main>
 
+      <main class="admin-content" id="view-productos">
+        <div class="admin-header">
+          <h2>Inventario de Productos</h2>
+          <p>Consulta los productos disponibles en la base de datos.</p>
+        </div>
+        <div class="data-table-container">
+          <div class="data-table-head head-productos">
+            <span>ID Producto</span>
+            <span>Nombre</span>
+            <span>Código de Barras</span>
+            <span>Precio Venta</span>
+            <span>Precio Compra</span>
+            <span>Categoría</span>
+            <span>Unidad de Medida</span>
+            <span>Fecha de Vencimiento</span>
+            <span>Acciones</span>
+          </div>
+          <div class="data-table-body" id="tbody-productos"></div>
+        </div>
+      </main>
+
+      <main class="admin-content" id="view-ventas">
+        <div class="admin-header">
+          <h2>Registro de Ventas</h2>
+          <p>Revisa las ventas registradas y su estado general.</p>
+        </div>
+        <div class="data-table-container">
+          <div class="data-table-head head-ventas">
+            <span>ID Venta</span>
+            <span>Fecha y Hora</span>
+            <span>Total a Pagar</span>
+            <span>Método de Pago</span>
+            <span>Estado</span>
+            <span>ID Empleado</span>
+            <span>ID Cliente</span>
+          </div>
+          <div class="data-table-body" id="tbody-ventas"></div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-agenda" aria-hidden="true">
+    <div class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="modal-agenda-titulo">
+      <div class="modal-header">
+        <div>
+          <p class="modal-eyebrow">Agenda</p>
+          <h3 id="modal-agenda-titulo">Nueva cita</h3>
+        </div>
+        <button class="modal-close" type="button" data-agenda-close="form" aria-label="Cerrar">×</button>
+      </div>
+
+      <form id="form-agenda" class="modal-form modal-form-grid">
+        <input type="hidden" id="agenda-id-cita">
+
+        <label for="agenda-fecha">Fecha</label>
+        <input type="date" id="agenda-fecha" name="fecha" required>
+
+        <label for="agenda-hora">Hora</label>
+        <input type="time" id="agenda-hora" name="hora" required>
+
+        <label for="agenda-paciente">Paciente</label>
+        <input type="text" id="agenda-paciente" name="paciente" required>
+
+        <label for="agenda-documento">Documento</label>
+        <input type="text" id="agenda-documento" name="documento">
+
+        <label for="agenda-telefono">Teléfono</label>
+        <input type="text" id="agenda-telefono" name="telefono">
+
+        <label for="agenda-empleado">Profesional</label>
+        <select id="agenda-empleado" name="idEmpleado">
+          <option value="">Sin asignar</option>
+        </select>
+
+        <label for="agenda-tratamiento">Tratamiento</label>
+        <input type="text" id="agenda-tratamiento" name="tratamiento" required>
+
+        <label for="agenda-estado">Estado</label>
+        <select id="agenda-estado" name="estado">
+          <option value="Programada">Programada</option>
+          <option value="Confirmada">Confirmada</option>
+          <option value="En sala">En sala</option>
+          <option value="Atendida">Atendida</option>
+          <option value="Cancelada">Cancelada</option>
+          <option value="Reprogramada">Reprogramada</option>
+        </select>
+
+        <label for="agenda-observacion">Observación</label>
+        <textarea id="agenda-observacion" name="observacion" rows="3"></textarea>
+
+        <p id="agenda-mensaje" class="modal-message modal-message-wide" aria-live="polite"></p>
+
+        <div class="modal-actions modal-actions-wide">
+          <button class="toolbar-btn" type="button" data-agenda-close="form">Cancelar</button>
+          <button class="toolbar-btn primary" type="submit">Guardar cita</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-agenda-eliminar" aria-hidden="true">
+    <div class="modal-card modal-card-small" role="dialog" aria-modal="true" aria-labelledby="modal-agenda-eliminar-titulo">
+      <div class="modal-header">
+        <div>
+          <p class="modal-eyebrow danger">Eliminar cita</p>
+          <h3 id="modal-agenda-eliminar-titulo">Confirmar eliminación</h3>
+        </div>
+        <button class="modal-close" type="button" data-agenda-close="delete" aria-label="Cerrar">×</button>
+      </div>
+
+      <p id="agenda-eliminar-texto" class="modal-confirm-text">¿Seguro que deseas eliminar esta cita?</p>
+
+      <div class="modal-actions">
+        <button class="toolbar-btn" type="button" data-agenda-close="delete">Cancelar</button>
+        <button class="toolbar-btn danger" type="button" id="btn-agenda-confirmar-eliminar">Eliminar</button>
+      </div>
     </div>
   </div>
 

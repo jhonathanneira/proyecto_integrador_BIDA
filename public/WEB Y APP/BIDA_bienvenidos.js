@@ -1,5 +1,5 @@
 function irAInicioSesion() {
-    window.location.href = 'BIDA_Inicio de sesion.html';
+    window.location.href = 'BIDA_Inicio de sesion_login.html';
 }
 
 function irARegistro() {
