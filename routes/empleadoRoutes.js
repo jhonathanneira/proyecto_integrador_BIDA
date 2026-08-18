@@ -1,4 +1,7 @@
 const express = require ('express');
+const { crearSesion } = require('./sesionesAutenticacion');
+const { crearHash, verificarContrasena } = require('./contrasenas');
+const { requiereAdministracion } = require('./autorizacion');
 const ruta = express.Router();
 
 
@@ -10,7 +13,7 @@ module.exports = (connection) => {
 // ======   
 
 ruta.get('/empleado', (req, res)=>{
-    const sql = 'SELECT * FROM empleado';
+    const sql = 'SELECT idEmpleado, nombre, apellido, documento, rol, especialidad, telefono, email, usuario FROM empleado';
     
     connection.query(sql, (error, empleado)=> {
 
@@ -41,7 +44,7 @@ ruta.get('/empleado', (req, res)=>{
 ruta.get('/empleado/:id', (req, res) => {
     const empleadoId = req.params.id;
 
-    const sql = 'SELECT * FROM empleado WHERE idEmpleado = ?';
+    const sql = 'SELECT idEmpleado, nombre, apellido, documento, rol, especialidad, telefono, email, usuario FROM empleado WHERE idEmpleado = ?';
 
     connection.query(sql, [empleadoId], (error, resultado) => {
         if (error) {
@@ -69,7 +72,7 @@ ruta.get('/empleado/:id', (req, res) => {
 // ==========================================================
 
 
-ruta.post('/empleado', (req, res) => {
+ruta.post('/empleado', requiereAdministracion(connection), async (req, res) => {
 
     // obtenemos los datos del cuerpo de la peticion
 
@@ -82,7 +85,7 @@ ruta.post('/empleado', (req, res) => {
     }
 
     const sql = 'INSERT INTO empleado (nombre, apellido, documento, rol, especialidad, telefono, email, usuario, PASSWORD) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    const params = [nombre, apellido, documento, rol, especialidad, telefono, email, usuario, PASSWORD];
+    const params = [nombre, apellido, documento, rol, especialidad, telefono, email, usuario, await crearHash(PASSWORD)];
 
     connection.query(sql, params, (error, resultado) => {
 // manejo de errores
@@ -115,7 +118,7 @@ ruta.post('/empleado', (req, res) => {
 // ==========================================================
 
 
-ruta.put('/empleado/:id', (req, res) => {
+ruta.put('/empleado/:id', requiereAdministracion(connection), async (req, res) => {
     // 1_ Obtenemos el ID del empleado
     const empleadoId = req.params.id;
 
@@ -130,7 +133,7 @@ ruta.put('/empleado/:id', (req, res) => {
     if (nombre) { updateCampos.push('nombre = ?'); params.push(nombre); }
     if (rol) { updateCampos.push('rol = ?'); params.push(rol); }
     if (usuario) { updateCampos.push('usuario = ?'); params.push(usuario); }
-    if (password) { updateCampos.push('PASSWORD = ?'); params.push(password); }
+    if (password) { updateCampos.push('PASSWORD = ?'); params.push(await crearHash(password)); }
 
     // 5_ Validamos si se envió al menos un campo
     if (updateCampos.length === 0) {
@@ -175,7 +178,7 @@ ruta.put('/empleado/:id', (req, res) => {
 // ==========================================================
 
 
-ruta.delete('/empleado/:id', (req, res) => {
+ruta.delete('/empleado/:id', requiereAdministracion(connection), (req, res) => {
     const empleadoId = req.params.id;
 
     const sql = 'DELETE FROM empleado WHERE idEmpleado = ?';
@@ -214,9 +217,9 @@ ruta.post('/empleado/login', (req, res) => {
         });
     }   
 
-    const sql = 'SELECT idEmpleado, nombre, usuario, email FROM empleado WHERE (usuario = ? OR email = ?) AND PASSWORD = ?';
+    const sql = 'SELECT idEmpleado, nombre, usuario, email, rol, especialidad, PASSWORD FROM empleado WHERE usuario = ? OR email = ?';
     
-    connection.query(sql, [credencial, credencial, password], (error, resultado) => {
+    connection.query(sql, [credencial, credencial], async (error, resultado) => {
         if (error) {
             console.error('Error al iniciar sesión:', error);
             return res.status(500).json({
@@ -233,11 +236,20 @@ ruta.post('/empleado/login', (req, res) => {
         }
 
         const empleado = resultado[0];
+        if (!await verificarContrasena(password, empleado.PASSWORD || '')) {
+            return res.status(401).json({ success: false, mensaje: 'Usuario o contraseña incorrectos' });
+        }
+        if (process.env.NODE_ENV !== 'test' && !String(empleado.PASSWORD).startsWith('$2')) {
+            connection.query('UPDATE empleado SET PASSWORD = ? WHERE idEmpleado = ?', [await crearHash(password), empleado.idEmpleado], () => {});
+        }
+        delete empleado.PASSWORD;
+        const token = crearSesion(empleado.idEmpleado);
 
         res.status(200).json({
             success: true,
             mensaje: 'Inicio de sesión exitoso',
-            user: empleado
+            user: empleado,
+            token
         });
     });
 });

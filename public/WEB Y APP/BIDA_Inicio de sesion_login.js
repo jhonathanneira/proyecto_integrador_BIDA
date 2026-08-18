@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok && data.success) {
         // Guarda el usuario logueado en sessionStorage
         sessionStorage.setItem('empleado', JSON.stringify(data.user));
+        sessionStorage.setItem('sesionToken', data.token);
         mensajeDiv.textContent = 'Inicio de sesión exitoso. Redirigiendo...';
         mensajeDiv.style.color = 'green';
 

@@ -1,10 +1,15 @@
 const express = require ('express');
+const path = require('path');
 const mysql = require ('mysql2');
 const cors = require ('cors');
 const productoRoutes = require('./routes/productoRoutes');
 const empleadoRoutes = require('./routes/empleadoRoutes');
 const ventaRoutes = require('./routes/ventaRoutes');
 const agendaRoutes = require('./routes/agendaRoutes');
+const clienteRoutes = require('./routes/clienteRoutes');
+const tratamientoRoutes = require('./routes/tratamientoRoutes');
+const equipoOdontologicoRoutes = require('./routes/equipoOdontologicoRoutes');
+const novedadRoutes = require('./routes/novedadRoutes');
 
 
 var app = express();
@@ -17,6 +22,8 @@ app.use(cors());
 // También aceptar JSON estándar
 app.use(express.json());
 app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => res.redirect('/WEB%20Y%20APP/BIDA_Inicio%20de%20sesion_login.html'));
 app.use((req, res, next) => {
     const raw = req.body;
     if (!raw || typeof raw !== 'string') {
@@ -88,6 +95,16 @@ if (process.env.NODE_ENV !== 'test') {
                 )
             `;
 
+            const sqlTratamiento = `CREATE TABLE IF NOT EXISTS tratamiento (idTratamiento INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(120) NOT NULL, descripcion TEXT DEFAULT NULL, categoria VARCHAR(100) DEFAULT NULL, costo DECIMAL(12,2) NOT NULL, duracionMinutos INT DEFAULT NULL, activo TINYINT(1) NOT NULL DEFAULT 1, createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
+            const sqlEquipo = `CREATE TABLE IF NOT EXISTS equipoOdontologico (idEquipo INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(120) NOT NULL, tipo VARCHAR(100) NOT NULL, marca VARCHAR(100) DEFAULT NULL, modelo VARCHAR(100) DEFAULT NULL, serial VARCHAR(100) DEFAULT NULL UNIQUE, fechaAdquisicion DATE DEFAULT NULL, estado VARCHAR(30) NOT NULL DEFAULT 'Disponible', ubicacion VARCHAR(120) DEFAULT NULL, proximoMantenimiento DATE DEFAULT NULL, observaciones TEXT DEFAULT NULL, createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
+            const sqlNovedad = `CREATE TABLE IF NOT EXISTS novedad (idNovedad INT AUTO_INCREMENT PRIMARY KEY, titulo VARCHAR(150) NOT NULL, descripcion TEXT NOT NULL, idEmpleado INT NOT NULL, createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, CONSTRAINT fk_novedad_empleado FOREIGN KEY (idEmpleado) REFERENCES empleado(idEmpleado) ON UPDATE CASCADE ON DELETE RESTRICT)`;
+
+            [sqlTratamiento, sqlEquipo, sqlNovedad].forEach((sqlTabla) => {
+                connection.query(sqlTabla, (errorTabla) => {
+                    if (errorTabla) console.error('Error al crear tablas de BIDA:', errorTabla);
+                });
+            });
+
             connection.query(sqlAgenda, (agendaError) => {
                 if (agendaError) {
                     throw agendaError;
@@ -107,6 +124,10 @@ app.use('/app', productoRoutes(connection));
 app.use('/app', empleadoRoutes(connection));
 app.use('/app', ventaRoutes(connection));
 app.use('/app', agendaRoutes(connection));
+app.use('/app', clienteRoutes(connection));
+app.use('/app', tratamientoRoutes(connection));
+app.use('/app', equipoOdontologicoRoutes(connection));
+app.use('/app', novedadRoutes(connection));
 
 // EXPORTAMOS LA APP
 module.exports = app;

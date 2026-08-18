@@ -1,83 +1,154 @@
 const request = require('supertest');
 
-// Mock especial transaccional para el módulo de ventas
-jest.mock('mysql2', () => {
-  return {
-    createConnection: jest.fn().mockReturnValue({
-      connect: jest.fn((callback) => { if (callback) callback(null); }),
-      query: jest.fn((sql, params, callback) => {
-        // Manejo estándar de argumentos de consulta de mysql2
-        const actualCallback = typeof callback === 'function' ? callback : params;
+const mockConnection = {
+  connect: jest.fn(),
+  query: jest.fn()
+};
 
-        if (typeof actualCallback === 'function') {
-          const sqlUpper = sql.toUpperCase();
-
-          // 1. Simular éxito de comandos de transacción
-          if (sqlUpper.includes('START TRANSACTION') || sqlUpper.includes('COMMIT') || sqlUpper.includes('ROLLBACK')) {
-            return actualCallback(null, {}, {});
-          }
-          // 2. Simular inserción de la Venta (POST) o Detalle
-          if (sqlUpper.includes('INSERT INTO VENTA')) {
-            return actualCallback(null, { insertId: 777 }, {});
-          }
-          if (sqlUpper.includes('INSERT INTO DETALLEVENTA')) {
-            return actualCallback(null, { affectedRows: 1 }, {});
-          }
-          // 3. Simular actualización de stock en inventario con filas afectadas > 0 (Éxito)
-          if (sqlUpper.includes('UPDATE INVENTARIO')) {
-            return actualCallback(null, { affectedRows: 1 }, {});
-          }
-          // 4. Simular respuesta del GET por ID (Join complejo de ventas)
-          return actualCallback(null, [
-            {
-              idVenta: 50,
-              fechaHora: new Date(),
-              totalPagar: "135000.00",
-              metodoPago: "EFECTIVO",
-              nombreEmpleado: "Carlos",
-              nombreCliente: "Diego",
-              cantidad: 2,
-              precioUnitario: 45000,
-              subtotalLinea: "90000.00",
-              nombreProducto: "Sutura Resorbible",
-              codigoBarra: "123456"
-            }
-          ], {});
-        }
-      })
-    })
-  };
-});
+jest.mock('mysql2', () => ({
+  createConnection: jest.fn(() => mockConnection)
+}));
 
 const app = require('../app');
 
-describe('Pruebas de Integración - Módulo Ventas', () => {
+function callbackDe(valores, callback) {
+  return typeof valores === 'function' ? valores : callback;
+}
 
-  beforeEach(() => { jest.clearAllMocks(); });
+function configurarVentaExitosa() {
+  mockConnection.query.mockImplementation((sql, valores, callback) => {
+    const responder = callbackDe(valores, callback);
+    const consulta = sql.toUpperCase();
 
-  // POST (CREAR VENTA CON DETALLES)
-  it('POST /app/venta -> Debería procesar la transacción y registrar la venta con éxito', async () => {
-    const nuevaVenta = {
-      idEmpleado: 1,
-      idCliente: 3,
-      metodoPago: "TARJETA",
-      productos: [
-        { idProducto: 15, cantidad: 2, precioUnitario: 45000 }
-      ]
-    };
+    if (consulta.includes('START TRANSACTION') || consulta.includes('COMMIT') || consulta.includes('ROLLBACK')) {
+      return responder(null, {});
+    }
+    if (consulta.includes('INSERT INTO VENTA')) {
+      return responder(null, { insertId: 777 });
+    }
+    if (consulta.includes('INSERT INTO DETALLEVENTA')) {
+      return responder(null, { affectedRows: 1 });
+    }
+    if (consulta.includes('UPDATE INVENTARIO')) {
+      return responder(null, { affectedRows: 1 });
+    }
 
-    const response = await request(app).post('/app/venta').send(nuevaVenta);
-    expect(response.statusCode).toBe(201);
-    expect(response.body).toHaveProperty('mensaje', 'Venta exitosa');
-    expect(response.body).toHaveProperty('idVenta', 777);
+    return responder(null, []);
+  });
+}
+
+function responderUnaConsulta(resultado, error = null) {
+  mockConnection.query.mockImplementationOnce((sql, valores, callback) => {
+    callbackDe(valores, callback)(error, resultado);
+  });
+}
+
+describe('Pruebas de integración - ventas', () => {
+  const venta = {
+    idEmpleado: 1,
+    idCliente: 3,
+    metodoPago: 'TARJETA',
+    productos: [{ idProducto: 15, cantidad: 2, precioUnitario: 45000 }]
+  };
+
+  beforeEach(() => {
+    mockConnection.query.mockReset();
   });
 
-  // GET DETALLE DE VENTA
-  it('GET /app/venta/:idVenta -> Debería reconstruir el JSON estructurado de la venta', async () => {
-    const response = await request(app).get('/app/venta/50').send();
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('idVenta', 50);
-    expect(Array.isArray(response.body.productos)).toBe(true);
-    expect(response.body.productos[0]).toHaveProperty('nombreProducto', 'Sutura Resorbible');
+  it('POST /app/venta registra una venta y calcula el total', async () => {
+    configurarVentaExitosa();
+
+    const respuesta = await request(app).post('/app/venta').send(venta);
+
+    expect(respuesta.statusCode).toBe(201);
+    expect(respuesta.body).toEqual({
+      mensaje: 'Venta exitosa',
+      idVenta: 777,
+      totalPagar: '90000.00'
+    });
+  });
+
+  it('POST /app/venta valida los datos obligatorios', async () => {
+    const respuesta = await request(app).post('/app/venta').send({ idEmpleado: 1 });
+
+    expect(respuesta.statusCode).toBe(400);
+    expect(respuesta.body.mensaje).toBe('Datos incompletos');
+    expect(mockConnection.query).not.toHaveBeenCalled();
+  });
+
+  it('POST /app/venta valida cada detalle de producto', async () => {
+    const respuesta = await request(app)
+      .post('/app/venta')
+      .send({ ...venta, productos: [{ idProducto: 15, cantidad: 0, precioUnitario: 45000 }] });
+
+    expect(respuesta.statusCode).toBe(400);
+    expect(respuesta.body.mensaje).toBe('Detalles del producto inválidos');
+  });
+
+  it('POST /app/venta revierte la transacción cuando no hay inventario', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockConnection.query.mockImplementation((sql, valores, callback) => {
+      const responder = callbackDe(valores, callback);
+      const consulta = sql.toUpperCase();
+
+      if (consulta.includes('UPDATE INVENTARIO')) {
+        return responder(null, { affectedRows: 0 });
+      }
+      if (consulta.includes('INSERT INTO VENTA')) {
+        return responder(null, { insertId: 777 });
+      }
+      return responder(null, {});
+    });
+
+    const respuesta = await request(app).post('/app/venta').send(venta);
+
+    expect(respuesta.statusCode).toBe(500);
+    expect(respuesta.body.errorDetails).toContain('Stock insuficiente');
+    expect(mockConnection.query.mock.calls.some(([sql]) => sql === 'ROLLBACK')).toBe(true);
+    consoleError.mockRestore();
+  });
+
+  it('GET /app/venta devuelve el listado de ventas', async () => {
+    responderUnaConsulta([{ idVenta: 50, totalPagar: '90000.00', metodoPago: 'TARJETA' }]);
+
+    const respuesta = await request(app).get('/app/venta');
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body).toEqual([{ idVenta: 50, totalPagar: '90000.00', metodoPago: 'TARJETA' }]);
+  });
+
+  it('GET /app/venta/:idVenta devuelve una venta con sus productos', async () => {
+    responderUnaConsulta([
+      {
+        idVenta: 50,
+        fechaHora: '2026-08-02T10:00:00.000Z',
+        totalPagar: '90000.00',
+        metodoPago: 'TARJETA',
+        nombreEmpleado: 'Carlos',
+        nombreCliente: 'Diego',
+        nombreProducto: 'Resina',
+        codigoBarra: '123456',
+        cantidad: 2,
+        precioUnitario: 45000,
+        subtotalLinea: '90000.00'
+      }
+    ]);
+
+    const respuesta = await request(app).get('/app/venta/50');
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body).toMatchObject({
+      idVenta: 50,
+      productos: [{ nombreProducto: 'Resina', cantidad: 2 }]
+    });
+  });
+
+  it('GET /app/venta/:idVenta devuelve 404 si la venta no existe', async () => {
+    responderUnaConsulta([]);
+
+    const respuesta = await request(app).get('/app/venta/999');
+
+    expect(respuesta.statusCode).toBe(404);
+    expect(respuesta.body.mensaje).toContain('no encontrada');
   });
 });

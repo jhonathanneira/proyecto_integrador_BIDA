@@ -1,8 +1,41 @@
 const express = require('express');
+const { obtenerSesion, extraerToken } = require('./sesionesAutenticacion');
 const ruta = express.Router();
 
 module.exports = (connection) => {
-    ruta.get('/cita', (req, res) => {
+    const requiereSesion = (req, res, next) => {
+        const token = extraerToken(req.headers.authorization);
+        const sesion = token && obtenerSesion(token);
+        if (!sesion) return res.status(401).json({ mensaje: 'Debes iniciar sesión para consultar la agenda.' });
+
+        connection.query('SELECT idEmpleado, especialidad FROM empleado WHERE idEmpleado = ?', [sesion.idEmpleado], (error, empleados) => {
+            if (error) return res.status(500).json({ mensaje: 'No fue posible validar el empleado.' });
+            if (!empleados.length) return res.status(404).json({ mensaje: 'Empleado no encontrado.' });
+            const especialidad = String(empleados[0].especialidad || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+            req.empleadoAgenda = { idEmpleado: sesion.idEmpleado, esAdministracion: especialidad === 'administracion' };
+            return next();
+        });
+    };
+
+    const requiereAdministracion = (req, res, next) => {
+        const token = extraerToken(req.headers.authorization);
+        const sesion = token && obtenerSesion(token);
+        if (!sesion) return res.status(401).json({ mensaje: 'Debes iniciar sesión para crear citas.' });
+
+        connection.query('SELECT especialidad FROM empleado WHERE idEmpleado = ?', [sesion.idEmpleado], (error, empleados) => {
+            if (error) return res.status(500).json({ mensaje: 'No fue posible validar la especialidad del empleado.' });
+            if (!empleados.length) return res.status(404).json({ mensaje: 'Empleado no encontrado.' });
+            const especialidad = String(empleados[0].especialidad || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+            if (especialidad !== 'administracion') {
+                return res.status(403).json({ mensaje: 'Solo los empleados con especialidad Administración pueden crear citas.' });
+            }
+            return next();
+        });
+    };
+
+    ruta.get('/cita', requiereSesion, (req, res) => {
+        const filtro = req.empleadoAgenda.esAdministracion ? '' : 'WHERE C.idEmpleado = ?';
+        const parametros = req.empleadoAgenda.esAdministracion ? [] : [req.empleadoAgenda.idEmpleado];
         const sql = `
             SELECT
                 C.idCita,
@@ -19,10 +52,11 @@ module.exports = (connection) => {
                 C.createdAt
             FROM cita C
             LEFT JOIN empleado E ON C.idEmpleado = E.idEmpleado
+            ${filtro}
             ORDER BY C.fecha ASC, C.hora ASC, C.idCita DESC
         `;
 
-        connection.query(sql, (error, citas) => {
+        connection.query(sql, parametros, (error, citas) => {
             if (error) {
                 console.error('Error al obtener citas:', error);
                 return res.status(500).json({
@@ -38,8 +72,10 @@ module.exports = (connection) => {
         });
     });
 
-    ruta.get('/cita/:id', (req, res) => {
+    ruta.get('/cita/:id', requiereSesion, (req, res) => {
         const idCita = req.params.id;
+        const filtro = req.empleadoAgenda.esAdministracion ? 'WHERE C.idCita = ?' : 'WHERE C.idCita = ? AND C.idEmpleado = ?';
+        const parametros = req.empleadoAgenda.esAdministracion ? [idCita] : [idCita, req.empleadoAgenda.idEmpleado];
         const sql = `
             SELECT
                 C.idCita,
@@ -56,10 +92,10 @@ module.exports = (connection) => {
                 C.createdAt
             FROM cita C
             LEFT JOIN empleado E ON C.idEmpleado = E.idEmpleado
-            WHERE C.idCita = ?
+            ${filtro}
         `;
 
-        connection.query(sql, [idCita], (error, filas) => {
+        connection.query(sql, parametros, (error, filas) => {
             if (error) {
                 console.error('Error al consultar cita:', error);
                 return res.status(500).json({
@@ -80,7 +116,7 @@ module.exports = (connection) => {
         });
     });
 
-    ruta.post('/cita', (req, res) => {
+    ruta.post('/cita', requiereAdministracion, (req, res) => {
         const {
             fecha,
             hora,
@@ -133,7 +169,7 @@ module.exports = (connection) => {
         });
     });
 
-    ruta.put('/cita/:id', (req, res) => {
+    ruta.put('/cita/:id', requiereAdministracion, (req, res) => {
         const idCita = req.params.id;
         const {
             fecha,
@@ -192,7 +228,7 @@ module.exports = (connection) => {
         });
     });
 
-    ruta.delete('/cita/:id', (req, res) => {
+    ruta.delete('/cita/:id', requiereAdministracion, (req, res) => {
         const idCita = req.params.id;
 
         connection.query('DELETE FROM cita WHERE idCita = ?', [idCita], (error, resultado) => {

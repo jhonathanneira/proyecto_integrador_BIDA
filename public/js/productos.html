@@ -84,6 +84,27 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="modal-editar-producto" aria-hidden="true">
+    <section class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="titulo-editar-producto">
+      <div class="modal-header">
+        <div><p class="modal-eyebrow">Inventario</p><h3 id="titulo-editar-producto">Editar producto</h3></div>
+        <button class="modal-close" type="button" data-cerrar-edicion-producto aria-label="Cerrar">×</button>
+      </div>
+      <form id="form-editar-producto" class="modal-form modal-form-grid">
+        <input id="editar-producto-id" type="hidden">
+        <label>Nombre<input id="editar-producto-nombre" type="text" required></label>
+        <label>Código de barras<input id="editar-producto-codigo" type="text" required></label>
+        <label>Precio de venta<input id="editar-producto-precio-venta" type="number" min="0" step="0.01" required></label>
+        <label>Precio de compra<input id="editar-producto-precio-compra" type="number" min="0" step="0.01" required></label>
+        <label>Categoría<input id="editar-producto-categoria" type="text" required></label>
+        <label>Unidad de medida<input id="editar-producto-unidad" type="text" required></label>
+        <label>Fecha de vencimiento<input id="editar-producto-fecha" type="date"></label>
+        <p id="mensaje-editar-producto" class="modal-message modal-message-wide" aria-live="polite"></p>
+        <div class="modal-actions modal-actions-wide"><button class="toolbar-btn" type="button" data-cerrar-edicion-producto>Cancelar</button><button class="toolbar-btn primary" type="submit">Guardar cambios</button></div>
+      </form>
+    </section>
+  </div>
+
   <script src="productos.js"></script>
 </body>
 </html>

@@ -47,6 +47,8 @@ body {
 .app-menu a.is-active { border-bottom-color: #fff; color: #fff; }
 .app-actions { display: flex; gap: 10px; }
 .pill { border: none; padding: 8px 14px; border-radius: 999px; background-color: #00a3ff; color: #fff; font-weight: 600; cursor: pointer; }
+.pill-with-icon { display: inline-flex; align-items: center; gap: 7px; }
+.pill-with-icon img { display: block; width: 32px; height: 32px; object-fit: contain; object-position: center; filter: brightness(0) invert(1); }
 .pill.ghost { background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.6); }
 .toolbar-btn {
     border: 1px solid #cbd5e1;
@@ -77,7 +79,16 @@ body {
 .app-subbar { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 12px 32px; background-color: #ffffff; border-bottom: 1px solid #dde3ea; }
 .subbar-menu { display: flex; flex: 1 1 auto; justify-content: center; gap: 14px; overflow-x: auto; }
 .tab { padding: 8px 18px; border: none; background-color: #e5e7eb; border-radius: 999px; font-size: 0.95rem; cursor: pointer; color: #4b5563; font-weight: 500; transition: all 0.2s;}
-.subbar-menu .tab { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; text-decoration: none; }
+.subbar-menu .tab { display: inline-flex; align-items: center; justify-content: center; min-width: 145px; min-height: 62px; text-decoration: none; line-height: 1.1; }
+.tab-icon { display: block; flex: 0 0 46px; width: 46px; height: 46px; margin-right: 12px; object-fit: contain; object-position: center; }
+.admin-tab[data-target="agenda"] .tab-icon,
+.admin-tab[data-target="empleados"] .tab-icon { transform: translateY(-6px); }
+.admin-tab[data-target="productos"] .tab-icon { transform: translateY(-4px); }
+.admin-tab[data-target="clientes"] .tab-icon { transform: translateY(-3px); }
+.admin-tab[data-target="ventas"] .tab-icon,
+.admin-tab[data-target="tratamientos"] .tab-icon { transform: translateY(-1px); }
+.admin-tab[data-target="equipos"] .tab-icon { transform: translateY(2px); }
+.tab.is-active .tab-icon { filter: brightness(0) invert(1); }
 .subbar-menu .tab:focus-visible { outline: 3px solid rgba(0, 87, 146, 0.28); outline-offset: 2px; }
 .tab.is-active { background-color: #005792; color: white; }
 .admin-tab { appearance: none; }
@@ -100,13 +111,14 @@ body {
 .data-table-head { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px; padding: 0 24px 10px; border-bottom: 2px solid #e0e6f0; font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .data-row { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr 100px; align-items: center; padding: 20px 24px; background-color: #ffffff; border: 1px solid #e0e6f0; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
 .data-row:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
+.data-row[hidden] { display: none; }
 
 
 /* Estructura específica para empleados con 9 campos */
 .head-empleados,
 #tbody-empleados .data-row {
-    grid-template-columns: 0.7fr 1fr 1fr 1fr 1fr 1.2fr 1fr 1.4fr 1fr;
-    min-width: 1180px;
+    grid-template-columns: 0.6fr 1fr 1fr 1fr 1fr 1.2fr 1fr 1.4fr 1fr 120px;
+    min-width: 1320px;
 }
 
 /* Estructura específica para agenda con 7 campos */
@@ -139,9 +151,15 @@ body {
 
 /* Botones de acción (Editar/Borrar) */
 .action-buttons { display: flex; gap: 8px; }
-.btn-icon { background: #f0f2f7; border: none; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; color: #4b5563; font-weight: bold; transition: background 0.2s; }
-.btn-icon:hover { background: #e0e6f0; color: #005792; }
-.btn-icon.delete:hover { background: #fee2e2; color: #ef4444; }
+.row-actions { display: flex; align-items: center; justify-content: center; gap: 9px; }
+.btn-icon { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid transparent; border-radius: 10px; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
+.btn-icon svg { width: 19px; height: 19px; fill: currentColor; }
+.btn-icon.edit { background: #e0f2fe; border-color: #bae6fd; color: #0369a1; }
+.btn-icon.edit:hover { background: #0284c7; border-color: #0284c7; color: #fff; }
+.btn-icon.delete { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+.btn-icon.delete:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
+.btn-icon:hover { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(15, 23, 42, .16); }
+.btn-icon:focus-visible { outline: 3px solid rgba(0, 87, 146, .28); outline-offset: 2px; }
 
 .agenda-summary-bar {
     display: flex;
@@ -327,3 +345,80 @@ body {
 .toolbar-btn.danger:hover {
     background: #b91c1c;
 }
+
+.agenda-calendar-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; }
+.calendar-navigation, .calendar-view-switch { display: flex; align-items: center; gap: 8px; }
+.calendar-navigation strong { min-width: 220px; text-align: center; color: #0f172a; text-transform: capitalize; }
+.calendar-nav-btn, .calendar-view-btn { border: 1px solid #cbd5e1; background: #fff; color: #334155; border-radius: 9px; cursor: pointer; font: inherit; font-weight: 700; }
+.calendar-nav-btn { width: 36px; height: 36px; font-size: 1.5rem; line-height: 1; }
+.calendar-view-btn { padding: 8px 12px; }
+.calendar-nav-btn:hover, .calendar-view-btn:hover, .calendar-view-btn.is-active { border-color: #005792; background: #005792; color: #fff; }
+.agenda-calendar { min-height: 360px; border: 1px solid #dbe4ee; border-radius: 16px; overflow: hidden; background: #fff; }
+.calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(135px, 1fr)); }
+.calendar-weekdays { background: #f1f5f9; border-bottom: 1px solid #dbe4ee; }
+.calendar-weekdays span { padding: 11px 9px; color: #475569; font-size: .78rem; font-weight: 800; text-align: center; text-transform: uppercase; }
+.calendar-grid { overflow-x: auto; }
+.calendar-day { min-height: 210px; padding: 9px; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; box-sizing: border-box; }
+.calendar-day:last-child { border-right: none; }
+.calendar-day.is-other-month { background: #f8fafc; color: #94a3b8; }
+.calendar-day.is-today .calendar-date { background: #005792; color: #fff; }
+.calendar-date { display: inline-grid; place-items: center; min-width: 28px; height: 28px; border-radius: 50%; font-weight: 800; color: #334155; }
+.calendar-event { width: 100%; margin-top: 7px; padding: 7px 8px; border: 0; border-left: 4px solid #0ea5e9; border-radius: 7px; background: #e0f2fe; color: #0c4a6e; cursor: pointer; font: inherit; text-align: left; }
+.calendar-event:hover { background: #bae6fd; }
+.calendar-event.is-readonly { cursor: default; }
+.action-restricted { color: #94a3b8; font-size: .82rem; font-weight: 700; }
+.calendar-event time { display: block; font-size: .75rem; font-weight: 800; }
+.calendar-event span { display: block; overflow: hidden; font-size: .79rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.agenda-calendar.is-day .calendar-grid { grid-template-columns: minmax(0, 1fr); }
+.agenda-calendar.is-day .calendar-day { min-height: 430px; border-right: none; }
+.agenda-calendar.is-day .calendar-event { max-width: 600px; }
+.agenda-calendar.is-month .calendar-day { min-height: 130px; }
+.agenda-calendar.is-month .calendar-event { padding: 4px 6px; margin-top: 4px; }
+@media (max-width: 760px) { .agenda-calendar-toolbar { align-items: flex-start; flex-direction: column; } .calendar-weekdays, .calendar-grid { grid-template-columns: repeat(7, minmax(110px, 1fr)); } .agenda-calendar { overflow-x: auto; } }
+
+.novedades-card { width: min(100%, 700px); }
+.novedades-header-actions { display: flex; align-items: center; gap: 10px; }
+.novedades-fecha { margin: -8px 0 18px; color: #64748b; text-transform: capitalize; }
+.novedades-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+.novedades-summary > p { grid-column: 1 / -1; margin: 0; color: #64748b; }
+.novedad-stat { display: grid; gap: 4px; padding: 16px; border-radius: 14px; background: #eff6ff; color: #005792; }
+.novedad-stat strong { font-size: 1.65rem; }
+.novedad-stat span { font-size: .83rem; font-weight: 600; }
+.novedad-stat.is-alert { background: #fef2f2; color: #b91c1c; }
+.novedades-list { display: grid; gap: 12px; }
+.form-novedad { display: grid; gap: 10px; margin: 0 0 18px; padding: 16px; border: 1px solid #bfdbfe; border-radius: 14px; background: #f0f9ff; }
+.form-novedad[hidden] { display: none; }
+.form-novedad h4 { margin: 0; color: #0f172a; }
+.form-novedad label { display: grid; gap: 5px; color: #334155; font-size: .9rem; font-weight: 600; }
+.form-novedad input, .form-novedad textarea { width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; }
+.form-novedad textarea { resize: vertical; }
+.novedad-item { display: flex; gap: 12px; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; }
+.novedad-icon { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 10px; background: #e0f2fe; font-size: 1.2rem; }
+.novedad-item h4 { margin: 0 0 4px; color: #0f172a; }
+.novedad-item p { margin: 0; color: #64748b; line-height: 1.45; font-size: .93rem; }
+.novedades-error { color: #b91c1c !important; }
+@media (max-width: 540px) { .novedades-summary { grid-template-columns: 1fr; } }
+
+.head-clientes,
+#tbody-clientes .data-row {
+    grid-template-columns: .6fr 1.5fr 1.1fr 1fr 1.4fr 120px;
+    min-width: 980px;
+}
+
+.head-tratamientos,
+#tbody-tratamientos .data-row {
+    grid-template-columns: .6fr 1.5fr 1.1fr 1fr .8fr .8fr 120px;
+    min-width: 1080px;
+}
+
+.head-equipos,
+#tbody-equipos .data-row {
+    grid-template-columns: .6fr 1.4fr 1.1fr 1fr 1.1fr 1fr 1.1fr 120px;
+    min-width: 1190px;
+}
+
+.module-toolbar { display: flex; justify-content: flex-end; }
+.entity-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; grid-column: 1 / -1; }
+.entity-fields label { display: grid; gap: 6px; font-weight: 700; color: #334155; }
+.entity-fields label.full-width { grid-column: 1 / -1; }
+@media (max-width: 640px) { .entity-fields { grid-template-columns: 1fr; } }

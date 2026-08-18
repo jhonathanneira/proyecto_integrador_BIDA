@@ -1,7 +1,9 @@
 const express = require ('express');
+const { requiereAdministracion } = require('./autorizacion');
 const ruta = express.Router();
 
 module.exports = (connection) => {
+const soloAdmin = requiereAdministracion(connection);
 
 
 // ======
@@ -86,7 +88,7 @@ ruta.get('/producto/:idProducto', (req, res) => {
 // Método para crear un producto
 //===========================================
 
-ruta.post('/producto', (req, res) => {
+ruta.post('/producto', soloAdmin, (req, res) => {
     let datos = {
         nombre: req.body.nombre,
         codigoBarra: req.body.codigoBarra,
@@ -123,7 +125,7 @@ ruta.post('/producto', (req, res) => {
 //===========================================
 
 
-ruta.put('/producto/:idProducto', (req, res) => {
+ruta.put('/producto/:idProducto', soloAdmin, (req, res) => {
     
     const idProducto = req.params.idProducto;
 
@@ -187,7 +189,7 @@ ruta.put('/producto/:idProducto', (req, res) => {
 //===========================================
 
 
-ruta.delete('/producto/:idProducto', (req, res) => {
+ruta.delete('/producto/:idProducto', soloAdmin, (req, res) => {
 
     const idProducto = req.params.idProducto;
 

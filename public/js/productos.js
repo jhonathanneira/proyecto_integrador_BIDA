@@ -1,7 +1,11 @@
 //Espera a que el DOM cargue
 document.addEventListener("DOMContentLoaded", () => {
     cargarProductos();
+    document.getElementById('form-editar-producto')?.addEventListener('submit', guardarEdicionProducto);
+    document.querySelectorAll('[data-cerrar-edicion-producto]').forEach(boton => boton.addEventListener('click', cerrarEdicionProducto));
 });
+
+let productosPorId = new Map();
 
 //Funcion que Llama a la API GET /app/producto.
 function cargarProductos() {
@@ -34,6 +38,8 @@ function cargarProductos() {
                 return;
             }
 
+            productosPorId = new Map(productos.map(producto => [String(producto.idProducto), producto]));
+
             tablaBody.innerHTML = productos.map(prod => `
                 <div class="data-row">
                     <div><div class="main-text">${prod.idProducto ?? ''}</div></div>
@@ -45,11 +51,14 @@ function cargarProductos() {
                     <div><div class="main-text">${prod.unidadMedida ?? ''}</div></div>
                     <div><div class="main-text">${prod.fechaVencimiento ? formatearFecha(prod.fechaVencimiento) : ''}</div></div>
                     <div>
-                        <button class="btn-editar" onclick="editarProducto(${prod.idProducto})">Editar</button>
+                        <button class="btn-editar" type="button" data-editar-producto="${prod.idProducto}">Editar</button>
                         <button class="btn-eliminar" onclick="eliminarProducto(${prod.idProducto})">Eliminar</button>
                     </div>
                 </div>
             `).join('');
+            tablaBody.querySelectorAll('[data-editar-producto]').forEach(boton => {
+                boton.addEventListener('click', () => editarProducto(boton.dataset.editarProducto));
+            });
         })
         .catch(err => {
             console.error("Error al conectar con la API:", err);
@@ -103,9 +112,56 @@ async function eliminarProducto(idProducto) {
 //=============================================
 // Función editar producto
 //=============================================
-function editarProducto(id) {
-    alert("Editar producto " + id); 
+function editarProducto(idProducto) {
+    const producto = productosPorId.get(String(idProducto));
+    if (!producto) return alert('No se encontró el producto seleccionado.');
 
+    document.getElementById('editar-producto-id').value = producto.idProducto;
+    document.getElementById('editar-producto-nombre').value = producto.nombre || '';
+    document.getElementById('editar-producto-codigo').value = producto.codigoBarra || '';
+    document.getElementById('editar-producto-precio-venta').value = producto.precioVenta ?? '';
+    document.getElementById('editar-producto-precio-compra').value = producto.precioCompra ?? '';
+    document.getElementById('editar-producto-categoria').value = producto.categoria || '';
+    document.getElementById('editar-producto-unidad').value = producto.unidadMedida || '';
+    document.getElementById('editar-producto-fecha').value = producto.fechaVencimiento ? String(producto.fechaVencimiento).slice(0, 10) : '';
+    document.getElementById('mensaje-editar-producto').textContent = '';
+    document.getElementById('modal-editar-producto').classList.add('is-open');
+}
 
+function cerrarEdicionProducto() {
+    document.getElementById('modal-editar-producto').classList.remove('is-open');
+}
 
-};
+async function guardarEdicionProducto(evento) {
+    evento.preventDefault();
+    const idProducto = document.getElementById('editar-producto-id').value;
+    const mensaje = document.getElementById('mensaje-editar-producto');
+    const producto = {
+        nombre: document.getElementById('editar-producto-nombre').value.trim(),
+        codigoBarra: document.getElementById('editar-producto-codigo').value.trim(),
+        precioVenta: Number(document.getElementById('editar-producto-precio-venta').value),
+        precioCompra: Number(document.getElementById('editar-producto-precio-compra').value),
+        categoria: document.getElementById('editar-producto-categoria').value.trim(),
+        unidadMedida: document.getElementById('editar-producto-unidad').value.trim(),
+        fechaVencimiento: document.getElementById('editar-producto-fecha').value || null
+    };
+
+    try {
+        const respuesta = await fetch(`http://localhost:3000/app/producto/${idProducto}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', ...encabezadosSesion() },
+            body: JSON.stringify(producto)
+        });
+        const datos = await respuesta.json().catch(() => ({}));
+        if (!respuesta.ok) throw new Error(datos.mensaje || datos.message || 'No fue posible actualizar el producto.');
+        cerrarEdicionProducto();
+        cargarProductos();
+    } catch (error) {
+        mensaje.textContent = error.message;
+    }
+}
+
+function encabezadosSesion() {
+    const token = sessionStorage.getItem('sesionToken');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}

@@ -17,20 +17,23 @@
       </div>
     </div>
     <div class="app-search">
-      <input type="text" class="top-search-input" placeholder="Buscar en el sistema...">
+      <input type="search" id="admin-search" class="top-search-input" placeholder="Buscar en el módulo actual..." aria-label="Buscar en el módulo actual">
     </div>
     <div class="app-actions">
-      <button class="pill">Novedades</button>
+      <button class="pill pill-with-icon" id="btn-novedades" type="button"><img src="assets/iconos/novedades.png" alt="" aria-hidden="true">Novedades</button>
       <button class="pill ghost" id="btn-logout" type="button">Cerrar sesión</button>
     </div>
   </header>
 
   <section class="app-subbar">
     <nav class="subbar-menu" aria-label="Módulos de administración">
-      <button class="tab is-active admin-tab" type="button" data-target="agenda">Agenda</button>
-      <button class="tab admin-tab" type="button" data-target="empleados">Empleados</button>
-      <button class="tab admin-tab" type="button" data-target="productos">Productos</button>
-      <button class="tab admin-tab" type="button" data-target="ventas">Ventas</button>
+      <button class="tab is-active admin-tab" type="button" data-target="agenda"><img class="tab-icon" src="assets/iconos/agenda.png" alt="" aria-hidden="true">Agenda</button>
+      <button class="tab admin-tab" type="button" data-target="empleados"><img class="tab-icon" src="assets/iconos/empleados.png" alt="" aria-hidden="true">Empleados</button>
+      <button class="tab admin-tab" type="button" data-target="productos"><img class="tab-icon" src="assets/iconos/productos.png" alt="" aria-hidden="true">Productos</button>
+      <button class="tab admin-tab" type="button" data-target="ventas"><img class="tab-icon" src="assets/iconos/ventas.png" alt="" aria-hidden="true">Ventas</button>
+      <button class="tab admin-tab" type="button" data-target="clientes"><img class="tab-icon" src="assets/iconos/clientes.png" alt="" aria-hidden="true">Clientes</button>
+      <button class="tab admin-tab" type="button" data-target="tratamientos"><img class="tab-icon" src="assets/iconos/tratamientos.png" alt="" aria-hidden="true">Tratamientos</button>
+      <button class="tab admin-tab" type="button" data-target="equipos"><img class="tab-icon" src="assets/iconos/equipos.png" alt="" aria-hidden="true">Equipos</button>
     </nav>
   </section>
 
@@ -54,7 +57,12 @@
             <button class="toolbar-btn primary" id="btn-nueva-cita" type="button">+ Nueva cita</button>
           </div>
         </div>
-        <div class="data-table-container">
+        <div class="agenda-calendar-toolbar" aria-label="Controles del calendario">
+          <div class="calendar-navigation"><button class="calendar-nav-btn" id="agenda-anterior" type="button" aria-label="Periodo anterior">‹</button><strong id="agenda-periodo">Cargando agenda…</strong><button class="calendar-nav-btn" id="agenda-siguiente" type="button" aria-label="Periodo siguiente">›</button></div>
+          <div class="calendar-view-switch" role="group" aria-label="Vista de agenda"><button class="calendar-view-btn" type="button" data-agenda-vista="dia">Día</button><button class="calendar-view-btn is-active" type="button" data-agenda-vista="semana">Semana</button><button class="calendar-view-btn" type="button" data-agenda-vista="mes">Mes</button></div>
+        </div>
+        <div class="agenda-calendar" id="agenda-calendar" aria-live="polite"></div>
+        <div class="data-table-container" id="agenda-lista" hidden>
           <div class="data-table-head head-agenda">
             <span>Fecha</span>
             <span>Hora</span>
@@ -73,6 +81,7 @@
           <h2>Gestión de Empleados</h2>
           <p>Consulta el personal médico y administrativo registrado en la base de datos.</p>
         </div>
+        <div class="module-toolbar"><button class="toolbar-btn primary" type="button" data-entity-new="empleado">+ Nuevo empleado</button></div>
         <div class="data-table-container">
           <div class="data-table-head head-empleados">
             <span>ID</span>
@@ -84,6 +93,7 @@
             <span>Teléfono</span>
             <span>Email</span>
             <span>Usuario</span>
+            <span>Acciones</span>
           </div>
           <div class="data-table-body" id="tbody-empleados"></div>
         </div>
@@ -94,6 +104,7 @@
           <h2>Inventario de Productos</h2>
           <p>Consulta los productos disponibles en la base de datos.</p>
         </div>
+        <div class="module-toolbar"><button class="toolbar-btn primary" type="button" data-entity-new="producto">+ Nuevo producto</button></div>
         <div class="data-table-container">
           <div class="data-table-head head-productos">
             <span>ID Producto</span>
@@ -127,6 +138,24 @@
           </div>
           <div class="data-table-body" id="tbody-ventas"></div>
         </div>
+      </main>
+
+      <main class="admin-content" id="view-clientes">
+        <div class="admin-header"><h2>Gestión de Clientes</h2><p>Registra y consulta los clientes vinculados al módulo de ventas.</p></div>
+        <div class="module-toolbar"><button class="toolbar-btn primary" type="button" data-entity-new="cliente">+ Nuevo cliente</button></div>
+        <div class="data-table-container"><div class="data-table-head head-clientes"><span>ID</span><span>Nombre</span><span>Documento</span><span>Teléfono</span><span>Correo</span><span>Acciones</span></div><div class="data-table-body" id="tbody-clientes"></div></div>
+      </main>
+
+      <main class="admin-content" id="view-tratamientos">
+        <div class="admin-header"><h2>Tratamientos Odontológicos</h2><p>Administra el catálogo de tratamientos, tarifas y duración.</p></div>
+        <div class="module-toolbar"><button class="toolbar-btn primary" type="button" data-entity-new="tratamiento">+ Nuevo tratamiento</button></div>
+        <div class="data-table-container"><div class="data-table-head head-tratamientos"><span>ID</span><span>Tratamiento</span><span>Categoría</span><span>Costo</span><span>Duración</span><span>Estado</span><span>Acciones</span></div><div class="data-table-body" id="tbody-tratamientos"></div></div>
+      </main>
+
+      <main class="admin-content" id="view-equipos">
+        <div class="admin-header"><h2>Equipos Odontológicos</h2><p>Controla el inventario, estado y mantenimiento de los equipos.</p></div>
+        <div class="module-toolbar"><button class="toolbar-btn primary" type="button" data-entity-new="equipo">+ Nuevo equipo</button></div>
+        <div class="data-table-container"><div class="data-table-head head-equipos"><span>ID</span><span>Equipo</span><span>Tipo</span><span>Marca</span><span>Serie</span><span>Estado</span><span>Ubicación</span><span>Acciones</span></div><div class="data-table-body" id="tbody-equipos"></div></div>
       </main>
 
     </div>
@@ -208,6 +237,62 @@
         <button class="toolbar-btn danger" type="button" id="btn-agenda-confirmar-eliminar">Eliminar</button>
       </div>
     </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-empleado" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="empleado-modal-titulo">
+      <div class="modal-header"><div><p class="modal-eyebrow">Gestión de empleados</p><h3 id="empleado-modal-titulo">Editar empleado</h3></div><button class="modal-close" type="button" data-empleado-close aria-label="Cerrar">×</button></div>
+      <form id="form-empleado" class="modal-form">
+        <input id="empleado-id" type="hidden">
+        <label>Nombre<input id="empleado-nombre" type="text" required></label>
+        <label>Rol<input id="empleado-rol" type="text" required></label>
+        <label>Usuario<input id="empleado-usuario" type="text" required></label>
+        <label>Nueva contraseña<input id="empleado-password" type="password" placeholder="Déjala vacía para conservarla"></label>
+        <p id="empleado-mensaje" class="modal-message" aria-live="polite"></p>
+        <div class="modal-actions"><button class="toolbar-btn" type="button" data-empleado-close>Cancelar</button><button class="toolbar-btn primary" type="submit">Guardar cambios</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-empleado-eliminar" aria-hidden="true">
+    <div class="modal-card modal-card-small" role="dialog" aria-modal="true" aria-labelledby="empleado-eliminar-titulo">
+      <div class="modal-header"><div><p class="modal-eyebrow danger">Eliminar empleado</p><h3 id="empleado-eliminar-titulo">Confirmar eliminación</h3></div><button class="modal-close" type="button" data-empleado-delete-close aria-label="Cerrar">×</button></div>
+      <p id="empleado-eliminar-texto" class="modal-confirm-text">¿Seguro que deseas eliminar este empleado?</p>
+      <div class="modal-actions"><button class="toolbar-btn" type="button" data-empleado-delete-close>Cancelar</button><button class="toolbar-btn danger" id="btn-empleado-eliminar" type="button">Eliminar</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-entidad" aria-hidden="true">
+    <div class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="modal-entidad-titulo">
+      <div class="modal-header"><div><p class="modal-eyebrow" id="modal-entidad-modulo">Administración</p><h3 id="modal-entidad-titulo">Nuevo registro</h3></div><button class="modal-close" type="button" data-entity-close aria-label="Cerrar">×</button></div>
+      <form id="form-entidad" class="modal-form modal-form-grid"><div id="campos-entidad" class="entity-fields"></div><p id="entidad-mensaje" class="modal-message modal-message-wide" aria-live="polite"></p><div class="modal-actions modal-actions-wide"><button class="toolbar-btn" type="button" data-entity-close>Cancelar</button><button class="toolbar-btn primary" type="submit">Guardar</button></div></form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-novedades" aria-hidden="true">
+    <section class="modal-card novedades-card" role="dialog" aria-modal="true" aria-labelledby="novedades-titulo">
+      <div class="modal-header">
+        <div><p class="modal-eyebrow">BIDA informa</p><h3 id="novedades-titulo">Novedades de la clínica</h3></div>
+        <div class="novedades-header-actions">
+          <button class="toolbar-btn primary" id="btn-crear-novedad" type="button" hidden>+ Crear novedad</button>
+          <button class="modal-close" type="button" data-novedades-close aria-label="Cerrar">×</button>
+        </div>
+      </div>
+      <p class="novedades-fecha" id="novedades-fecha"></p>
+      <div class="novedades-summary" id="novedades-summary" aria-live="polite"><p>Cargando novedades...</p></div>
+      <form id="form-novedad" class="form-novedad" hidden>
+        <h4>Publicar novedad</h4>
+        <label>Título<input id="novedad-titulo" name="titulo" type="text" maxlength="150" required></label>
+        <label>Descripción<textarea id="novedad-descripcion" name="descripcion" rows="3" required></textarea></label>
+        <p id="novedad-mensaje" class="modal-message" aria-live="polite"></p>
+        <button class="toolbar-btn primary" type="submit">Publicar</button>
+      </form>
+      <div class="novedades-list" id="novedades-list" aria-live="polite">
+        <article class="novedad-item"><span class="novedad-icon">📅</span><div><h4>Recordatorio de agenda</h4><p>Confirma con anticipación las citas programadas para hoy y registra cualquier cambio de estado.</p></div></article>
+        <article class="novedad-item"><span class="novedad-icon">🦷</span><div><h4>Atención al paciente</h4><p>Actualiza los datos de contacto del cliente antes de registrar una venta o una nueva cita.</p></div></article>
+        <article class="novedad-item"><span class="novedad-icon">✨</span><div><h4>Control de calidad</h4><p>Revisa el estado y próximo mantenimiento de los equipos odontológicos al inicio de la jornada.</p></div></article>
+      </div>
+    </section>
   </div>
 
   <script src="administracion.js"></script>

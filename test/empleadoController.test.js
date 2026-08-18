@@ -1,91 +1,111 @@
 const request = require('supertest');
 
-// Mock adaptado para empleados
-jest.mock('mysql2', () => {
-  return {
-    createConnection: jest.fn().mockReturnValue({
-      connect: jest.fn((callback) => { if (callback) callback(null); }),
-      query: jest.fn((sql, params, callback) => {
-        const cb = typeof callback === 'function' ? callback : params;
-        
-        if (typeof cb === 'function') {
-          const sqlUpper = sql.toUpperCase();
+const mockConnection = {
+  connect: jest.fn(),
+  query: jest.fn()
+};
 
-          // 1. Mock para DELETE o UPDATE
-          if (sqlUpper.includes('DELETE') || sqlUpper.includes('UPDATE')) {
-            return cb(null, { affectedRows: 1 }, {});
-          }
-
-          // 2. Mock para INSERT (POST '/empleado')
-          if (sqlUpper.includes('INSERT')) {
-            return cb(null, { insertId: 10 }, {});
-          }
-
-          // 3. Mock para el GET general y GET por ID ('/empleado')
-          const listaMocked = [
-            { idEmpleado: 1, nombre: 'Dr. Carlos', apellido: 'Restrepo', rol: 'Odontólogo' }
-          ];
-          
-          return cb(null, listaMocked, {});
-        }
-      })
-    })
-  };
-});
+jest.mock('mysql2', () => ({
+  createConnection: jest.fn(() => mockConnection)
+}));
 
 const app = require('../app');
 
-describe('Pruebas de Integración - Módulo Empleados', () => {
+const empleado = {
+  nombre: 'Ana',
+  apellido: 'Gómez',
+  documento: '10234567',
+  rol: 'Odontóloga',
+  especialidad: 'Endodoncia',
+  telefono: '3201234567',
+  email: 'ana@bida.com',
+  usuario: 'ana.endo',
+  PASSWORD: 'password123'
+};
 
+function responderUnaConsulta(resultado, error = null) {
+  mockConnection.query.mockImplementationOnce((sql, valores, callback) => {
+    const responder = typeof valores === 'function' ? valores : callback;
+    responder(error, resultado);
+  });
+}
+
+describe('Pruebas de integración - empleados', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockConnection.query.mockReset();
   });
 
-  // Test 1: GET General
-  it('GET /app/empleado -> Debería retornar estado 200 y la lista', async () => {
-    const response = await request(app).get('/app/empleado').send();
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('mensaje', 'lista de empleados obtenidos exitosamente');
+  it('GET /app/empleado devuelve los empleados', async () => {
+    responderUnaConsulta([{ idEmpleado: 1, ...empleado }]);
+
+    const respuesta = await request(app).get('/app/empleado');
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body).toMatchObject({
+      total: 1,
+      empleados: [{ idEmpleado: 1, nombre: 'Ana' }]
+    });
   });
 
-  // Test 2: GET por ID
-  it('GET /app/empleado/:id -> Debería retornar un empleado específico', async () => {
-    const response = await request(app).get('/app/empleado/1').send();
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('mensaje', 'Detalles del empleado 1 obtenidos.');
+  it('GET /app/empleado/:id devuelve un empleado', async () => {
+    responderUnaConsulta([{ idEmpleado: 1, ...empleado }]);
+
+    const respuesta = await request(app).get('/app/empleado/1');
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body).toMatchObject({ empleado: { idEmpleado: 1, nombre: 'Ana' } });
   });
 
-  // Test 3: POST Crear
-  it('POST /app/empleado -> Debería crear un empleado exitosamente', async () => {
-    const nuevoEmpleado = {
-      nombre: "Ana",
-      apellido: "Gómez",
-      documento: "10234567",
-      rol: "Odontóloga",
-      especialidad: "Endodoncia",
-      telefono: "3201234567",
-      email: "ana@bida.com",
-      usuario: "ana.endo",
-      PASSWORD: "password123"
-    };
-    const response = await request(app).post('/app/empleado').send(nuevoEmpleado);
-    expect(response.statusCode).toBe(201);
-    expect(response.body).toHaveProperty('idEmpleado', 10);
+  it('POST /app/empleado crea un empleado', async () => {
+    responderUnaConsulta({ insertId: 10 });
+
+    const respuesta = await request(app).post('/app/empleado').send(empleado);
+
+    expect(respuesta.statusCode).toBe(201);
+    expect(respuesta.body).toMatchObject({ idEmpleado: 10, empleado: { nombre: 'Ana' } });
   });
 
-  // Test 4: PUT Actualizar (Ruta en singular)
-  it('PUT /app/empleado/:id -> Debería actualizar al empleado', async () => {
-    const datos = { nombre: "Ana María", rol: "Especialista" };
-    const response = await request(app).put('/app/empleado/1').send(datos);
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('mensaje', 'Empleado con ID 1 actualizado exitosamente');
+  it('POST /app/empleado valida los datos obligatorios', async () => {
+    const respuesta = await request(app).post('/app/empleado').send({ nombre: 'Ana' });
+
+    expect(respuesta.statusCode).toBe(400);
+    expect(respuesta.body.mensaje).toContain('Faltan datos obligatorios');
+    expect(mockConnection.query).not.toHaveBeenCalled();
   });
 
-  // Test 5: DELETE Eliminar (Ruta en singular)
-  it('DELETE /app/empleado/:id -> Debería eliminar al empleado', async () => {
-    const response = await request(app).delete('/app/empleado/1').send();
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('mensaje', 'Empleado con ID 1 eliminado exitosamente');
+  it('PUT /app/empleado/:id actualiza los campos enviados', async () => {
+    responderUnaConsulta({ affectedRows: 1 });
+
+    const respuesta = await request(app)
+      .put('/app/empleado/1')
+      .send({ nombre: 'Ana María', rol: 'Especialista', password: 'nueva-clave' });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body.mensaje).toContain('actualizado exitosamente');
   });
 
+  it('PUT /app/empleado/:id requiere al menos un campo válido', async () => {
+    const respuesta = await request(app).put('/app/empleado/1').send({ apellido: 'Gómez' });
+
+    expect(respuesta.statusCode).toBe(400);
+    expect(respuesta.body.mensaje).toContain('No hay campos válidos');
+  });
+
+  it('DELETE /app/empleado/:id elimina el empleado', async () => {
+    responderUnaConsulta({ affectedRows: 1 });
+
+    const respuesta = await request(app).delete('/app/empleado/1');
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body.mensaje).toContain('eliminado exitosamente');
+  });
+
+  it('POST /app/empleado devuelve 409 ante documento o usuario duplicado', async () => {
+    responderUnaConsulta(null, { code: 'ER_DUP_ENTRY' });
+
+    const respuesta = await request(app).post('/app/empleado').send(empleado);
+
+    expect(respuesta.statusCode).toBe(409);
+    expect(respuesta.body.mensaje).toContain('ya existe');
+  });
 });
