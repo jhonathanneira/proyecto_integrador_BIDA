@@ -55,15 +55,18 @@ app.use((req, res, next) => {
 
 //asignamos el puerto 3000 a una variable
 
-var puerto = 3000;
+var puerto = process.env.PORT || 3000;
 
 // DEFINIMOS LOS PARÁMETROS DE CONEXIÓN A LA BASE DE DATOS 
 var connection = mysql.createConnection({
-    host: 'localhost', 
-    user: 'root',
-    password: '',
-    database: 'bida', 
-    port: 3308
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'bida',
+    port: Number(process.env.DB_PORT || 3308),
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined
+
+
 });
 
 // EVITAR QUE LEVANTE EL PUERTO Y CONEXIÓN REAL SI ESTAMOS EN NUESTRAS PRUEBAS (JEST)
@@ -111,7 +114,7 @@ if (process.env.NODE_ENV !== 'test') {
                 }
 
                 // Probamos la conexión con servidor local
-                app.listen(puerto, function () {
+                app.listen(puerto, '0.0.0.0', function () {
                     console.log('Conexión con servidor ok en el puerto ' + puerto);
                 });
             });
