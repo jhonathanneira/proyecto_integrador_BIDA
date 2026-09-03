@@ -1,4 +1,4 @@
-const API_BIDA = 'http://localhost:3000/app';
+const API_BIDA = '/app';
 
 function iniciarGestion(config) {
   const raiz = document.getElementById('gestion-app');

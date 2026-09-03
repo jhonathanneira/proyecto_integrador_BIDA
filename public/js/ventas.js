@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function cargarDatos(modulo) {
-        const url = 'http://localhost:3000/app/venta';
+        const url = '/app/venta';
 
         fetch(url)
             .then(res => {

@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const API_URL = 'http://localhost:3000/app/empleado/login';
+    const API_URL = '/app/empleado/login';
 
     try {
       // Enviar datos al servidor usando fetch

@@ -18,7 +18,7 @@ function cargarProductos() {
 
     tablaBody.innerHTML = '<div class="data-row">Cargando datos...</div>';
 
-    fetch("http://localhost:3000/app/producto")
+    fetch("/app/producto")
         .then(res => {
             if (!res.ok) {
                 throw new Error(`HTTP ${res.status}`);
@@ -85,7 +85,7 @@ function formatearFecha(fecha) {
 
 async function eliminarProducto(idProducto) {
     try {
-        const response = await fetch(`http://localhost:3000/app/producto/${idProducto}`, {
+        const response = await fetch(`/app/producto/${idProducto}`, {
             method: 'DELETE'
         });
 
@@ -147,7 +147,7 @@ async function guardarEdicionProducto(evento) {
     };
 
     try {
-        const respuesta = await fetch(`http://localhost:3000/app/producto/${idProducto}`, {
+        const respuesta = await fetch(`/app/producto/${idProducto}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', ...encabezadosSesion() },
             body: JSON.stringify(producto)

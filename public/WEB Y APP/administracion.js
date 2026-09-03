@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(tbody, 'Cargando citas...');
 
         try {
-            const response = await fetch('http://localhost:3000/app/cita', { headers: encabezadosSesion() });
+            const response = await fetch('/app/cita', { headers: encabezadosSesion() });
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!agendaEmpleado) return;
 
         try {
-            const response = await fetch('http://localhost:3000/app/empleado');
+            const response = await fetch('/app/empleado');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const idCita = agendaId.value;
         const method = idCita ? 'PUT' : 'POST';
-        const url = idCita ? `http://localhost:3000/app/cita/${idCita}` : 'http://localhost:3000/app/cita';
+        const url = idCita ? `/app/cita/${idCita}` : '/app/cita';
 
         try {
             const response = await fetch(url, {
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!citaPendienteEliminar) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/app/cita/${citaPendienteEliminar}`, {
+            const response = await fetch(`/app/cita/${citaPendienteEliminar}`, {
                 method: 'DELETE'
             });
 
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(tbody, 'Cargando datos...');
 
         try {
-            const response = await fetch('http://localhost:3000/app/empleado');
+            const response = await fetch('/app/empleado');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -538,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const datos = { nombre: empleadoNombreInput.value.trim(), rol: empleadoRolInput.value.trim(), usuario: empleadoUsuarioInput.value.trim() };
         if (empleadoPasswordInput.value.trim()) datos.password = empleadoPasswordInput.value.trim();
         try {
-            const response = await fetch(`http://localhost:3000/app/empleado/${empleadoIdInput.value}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...encabezadosSesion() }, body: JSON.stringify(datos) });
+            const response = await fetch(`/app/empleado/${empleadoIdInput.value}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...encabezadosSesion() }, body: JSON.stringify(datos) });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.mensaje || `HTTP ${response.status}`);
             cerrarModalEmpleado();
@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function eliminarEmpleadoConfirmado() {
         if (!puedeCrearCitas || !empleadoPendienteEliminar) return;
         try {
-            const response = await fetch(`http://localhost:3000/app/empleado/${empleadoPendienteEliminar}`, { method: 'DELETE', headers: encabezadosSesion() });
+            const response = await fetch(`/app/empleado/${empleadoPendienteEliminar}`, { method: 'DELETE', headers: encabezadosSesion() });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.mensaje || `HTTP ${response.status}`);
             cerrarModalEmpleadoEliminar();
@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(tbody, 'Cargando datos...');
 
         try {
-            const response = await fetch('http://localhost:3000/app/producto');
+            const response = await fetch('/app/producto');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(tbody, 'Cargando datos...');
 
         try {
-            const response = await fetch('http://localhost:3000/app/venta');
+            const response = await fetch('/app/venta');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.eliminarProducto = async function eliminarProducto(idProducto) {
         try {
-            const response = await fetch(`http://localhost:3000/app/producto/${idProducto}`, {
+            const response = await fetch(`/app/producto/${idProducto}`, {
                 method: 'DELETE',
                 headers: encabezadosSesion()
             });
@@ -718,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!citaPendienteEliminar) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/app/cita/${citaPendienteEliminar}`, {
+            const response = await fetch(`/app/cita/${citaPendienteEliminar}`, {
                 method: 'DELETE',
                 headers: encabezadosSesion()
             });
@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const idCita = agendaId.value;
         const method = idCita ? 'PUT' : 'POST';
-        const url = idCita ? `http://localhost:3000/app/cita/${idCita}` : 'http://localhost:3000/app/cita';
+        const url = idCita ? `/app/cita/${idCita}` : '/app/cita';
 
         try {
             const response = await fetch(url, {
@@ -808,7 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!agendaEmpleado) return;
 
         try {
-            const response = await fetch('http://localhost:3000/app/empleado');
+            const response = await fetch('/app/empleado');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -925,8 +925,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const [respuestaCitas, respuestaEquipos] = await Promise.all([
-                fetch('http://localhost:3000/app/cita', { headers: encabezadosSesion() }),
-                fetch('http://localhost:3000/app/equipo-odontologico')
+                fetch('/app/cita', { headers: encabezadosSesion() }),
+                fetch('/app/equipo-odontologico')
             ]);
             if (!respuestaCitas.ok || !respuestaEquipos.ok) throw new Error('No se pudieron obtener las novedades.');
             const datosCitas = await respuestaCitas.json();
@@ -959,9 +959,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const [respuestaCitas, respuestaEquipos, respuestaNovedades] = await Promise.all([
-                fetch('http://localhost:3000/app/cita', { headers: encabezadosSesion() }),
-                fetch('http://localhost:3000/app/equipo-odontologico'),
-                fetch('http://localhost:3000/app/novedad')
+                fetch('/app/cita', { headers: encabezadosSesion() }),
+                fetch('/app/equipo-odontologico'),
+                fetch('/app/novedad')
             ]);
             if (!respuestaCitas.ok || !respuestaEquipos.ok || !respuestaNovedades.ok) throw new Error('No se pudieron cargar las novedades.');
             const datosCitas = await respuestaCitas.json();
@@ -1010,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!empleadoSesion?.idEmpleado || !puedePublicarNovedades) return;
         mostrarMensaje(novedadMensaje, 'Publicando...', false);
         try {
-            const response = await fetch('http://localhost:3000/app/novedad', {
+            const response = await fetch('/app/novedad', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('sesionToken') || ''}` },
                 body: JSON.stringify({ titulo: novedadTitulo.value.trim(), descripcion: novedadDescripcion.value.trim() })
@@ -1049,7 +1049,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = document.getElementById(config.tbody);
         setLoading(tbody, 'Cargando datos...');
         try {
-            const response = await fetch(`http://localhost:3000/app/${config.ruta}`);
+            const response = await fetch(`/app/${config.ruta}`);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             const lista = Array.isArray(data) ? data : (data[config.lista] || []);
@@ -1072,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!entidadActual) return;
         const datos = Object.fromEntries(new FormData(formEntidad));
         ['costo', 'duracionMinutos'].forEach(campo => { if (campo in datos && datos[campo] !== '') datos[campo] = Number(datos[campo]); });
-        const url = `http://localhost:3000/app/${entidadActual.ruta}${entidadEditandoId ? `/${entidadEditandoId}` : ''}`;
+        const url = `/app/${entidadActual.ruta}${entidadEditandoId ? `/${entidadEditandoId}` : ''}`;
         try {
             const response = await fetch(url, { method: entidadEditandoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', ...encabezadosSesion() }, body: JSON.stringify(datos) });
             const data = await response.json().catch(() => ({}));
@@ -1089,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('¿Seguro que deseas eliminar este registro?')) return;
         const config = configuracionEntidades[nombreEntidad];
         try {
-            const response = await fetch(`http://localhost:3000/app/${config.ruta}/${id}`, { method: 'DELETE', headers: encabezadosSesion() });
+            const response = await fetch(`/app/${config.ruta}/${id}`, { method: 'DELETE', headers: encabezadosSesion() });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.mensaje || `HTTP ${response.status}`);
             await cargarEntidad(nombreEntidad);
