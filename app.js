@@ -57,6 +57,28 @@ app.use((req, res, next) => {
 
 var puerto = process.env.PORT || 3000;
 
+function asegurarColumnaRol(callback) {
+    const sqlColumna = `SELECT DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'empleado' AND COLUMN_NAME = 'rol'`;
+
+    connection.query(sqlColumna, (error, columnas) => {
+        if (error || !columnas.length) return callback(error);
+
+        const columna = columnas[0];
+        const requiereCambio = columna.DATA_TYPE.toLowerCase() !== 'varchar'
+            || Number(columna.CHARACTER_MAXIMUM_LENGTH) < 50
+            || columna.IS_NULLABLE !== 'NO';
+
+        if (!requiereCambio) return callback();
+
+        connection.query('ALTER TABLE empleado MODIFY COLUMN rol VARCHAR(50) NOT NULL', (errorAlteracion) => {
+            if (!errorAlteracion) console.log('Columna rol actualizada para admitir nuevos roles.');
+            callback(errorAlteracion);
+        });
+    });
+}
+
 // DEFINIMOS LOS PARÁMETROS DE CONEXIÓN A LA BASE DE DATOS 
 var connection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
@@ -77,6 +99,9 @@ if (process.env.NODE_ENV !== 'test') {
             throw error;
         } else {
             console.log('Conexión exitosa a la base de datos');
+
+            asegurarColumnaRol((errorRol) => {
+                if (errorRol) throw errorRol;
 
             const sqlAgenda = `
                 CREATE TABLE IF NOT EXISTS cita (
@@ -117,6 +142,7 @@ if (process.env.NODE_ENV !== 'test') {
                 app.listen(puerto, '0.0.0.0', function () {
                     console.log('Conexión con servidor ok en el puerto ' + puerto);
                 });
+            });
             });
         }
     });

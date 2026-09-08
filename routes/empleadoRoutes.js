@@ -90,10 +90,17 @@ ruta.post('/empleado', requiereAdministracion(connection), async (req, res) => {
     connection.query(sql, params, (error, resultado) => {
 // manejo de errores
         if (error) {
-            console.error('Error al crear empleado:', error);
+            // No registramos `error.sql`: mysql2 incluye allí los valores y el
+            // hash de la contraseña.
+            console.error('Error al crear empleado:', error.code, error.sqlMessage);
             if (error.code === 'ER_DUP_ENTRY') {
                 return res.status(409).json({
                     mensaje: 'El documento o el usuario ya existe. Por favor, elija otro.'
+                });
+            }
+            if (error.code === 'WARN_DATA_TRUNCATED') {
+                return res.status(400).json({
+                    mensaje: 'El rol indicado no es válido para la configuración actual de la base de datos.'
                 });
             }
             return res.status(500).json({
