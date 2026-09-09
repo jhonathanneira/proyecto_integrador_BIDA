@@ -10,6 +10,7 @@ function requiereAdministracion(connection) {
             if (error) return res.status(500).json({ mensaje: 'No fue posible validar la especialidad.' });
             const especialidad = String(empleados[0]?.especialidad || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
             if (especialidad !== 'administracion') return res.status(403).json({ mensaje: 'Solo Administración puede realizar esta acción.' });
+            req.sesion = sesion;
             return next();
         });
     };

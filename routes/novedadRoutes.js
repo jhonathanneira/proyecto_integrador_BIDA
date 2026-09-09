@@ -1,5 +1,6 @@
 const express = require('express');
 const { obtenerSesion, extraerToken } = require('./sesionesAutenticacion');
+const { requiereAdministracion } = require('./autorizacion');
 
 module.exports = (connection) => {
     const ruta = express.Router();
@@ -45,6 +46,31 @@ module.exports = (connection) => {
                     return res.status(201).json({ mensaje: 'Novedad publicada exitosamente.', idNovedad: resultado.insertId });
                 }
             );
+        });
+    });
+
+    ruta.put('/novedad/:id', requiereAdministracion(connection), (req, res) => {
+        const { titulo, descripcion } = req.body || {};
+        if (!String(titulo || '').trim() || !String(descripcion || '').trim()) {
+            return res.status(400).json({ mensaje: 'El titulo y la descripcion son obligatorios.' });
+        }
+
+        connection.query(
+            'UPDATE novedad SET titulo = ?, descripcion = ? WHERE idNovedad = ?',
+            [String(titulo).trim(), String(descripcion).trim(), req.params.id],
+            (error, resultado) => {
+                if (error) return res.status(500).json({ mensaje: 'No fue posible actualizar la novedad.' });
+                if (!resultado.affectedRows) return res.status(404).json({ mensaje: 'Novedad no encontrada.' });
+                return res.status(200).json({ mensaje: 'Novedad actualizada correctamente.' });
+            }
+        );
+    });
+
+    ruta.delete('/novedad/:id', requiereAdministracion(connection), (req, res) => {
+        connection.query('DELETE FROM novedad WHERE idNovedad = ?', [req.params.id], (error, resultado) => {
+            if (error) return res.status(500).json({ mensaje: 'No fue posible eliminar la novedad.' });
+            if (!resultado.affectedRows) return res.status(404).json({ mensaje: 'Novedad no encontrada.' });
+            return res.status(200).json({ mensaje: 'Novedad eliminada correctamente.' });
         });
     });
 

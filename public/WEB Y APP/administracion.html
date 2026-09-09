@@ -281,11 +281,12 @@
       <p class="novedades-fecha" id="novedades-fecha"></p>
       <div class="novedades-summary" id="novedades-summary" aria-live="polite"><p>Cargando novedades...</p></div>
       <form id="form-novedad" class="form-novedad" hidden>
-        <h4>Publicar novedad</h4>
+        <h4 id="novedad-form-titulo">Publicar novedad</h4>
+        <input id="novedad-id" type="hidden">
         <label>Título<input id="novedad-titulo" name="titulo" type="text" maxlength="150" required></label>
         <label>Descripción<textarea id="novedad-descripcion" name="descripcion" rows="3" required></textarea></label>
         <p id="novedad-mensaje" class="modal-message" aria-live="polite"></p>
-        <button class="toolbar-btn primary" type="submit">Publicar</button>
+        <div class="modal-actions"><button class="toolbar-btn" id="btn-cancelar-novedad" type="button" hidden>Cancelar</button><button class="toolbar-btn primary" id="btn-guardar-novedad" type="submit">Publicar</button></div>
       </form>
       <div class="novedades-list" id="novedades-list" aria-live="polite">
         <article class="novedad-item"><span class="novedad-icon">📅</span><div><h4>Recordatorio de agenda</h4><p>Confirma con anticipación las citas programadas para hoy y registra cualquier cambio de estado.</p></div></article>

@@ -188,6 +188,12 @@ ruta.put('/empleado/:id', requiereAdministracion(connection), async (req, res) =
 ruta.delete('/empleado/:id', requiereAdministracion(connection), (req, res) => {
     const empleadoId = req.params.id;
 
+    if (String(req.sesion?.idEmpleado) === String(empleadoId)) {
+        return res.status(400).json({
+            mensaje: 'No puedes eliminar el usuario con el que tienes la sesion iniciada.'
+        });
+    }
+
     const sql = 'DELETE FROM empleado WHERE idEmpleado = ?';
 
     connection.query(sql, [empleadoId], (error, result) => {

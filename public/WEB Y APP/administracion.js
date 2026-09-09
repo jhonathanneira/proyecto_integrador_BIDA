@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const novedadTitulo = document.getElementById('novedad-titulo');
     const novedadDescripcion = document.getElementById('novedad-descripcion');
     const novedadMensaje = document.getElementById('novedad-mensaje');
+    const novedadId = document.getElementById('novedad-id');
+    const novedadFormTitulo = document.getElementById('novedad-form-titulo');
+    const btnGuardarNovedad = document.getElementById('btn-guardar-novedad');
+    const btnCancelarNovedad = document.getElementById('btn-cancelar-novedad');
     const empleadoSesion = obtenerEmpleadoSesion();
     const puedePublicarNovedades = esAdministracion(empleadoSesion?.especialidad);
     const puedeCrearCitas = esAdministracion(empleadoSesion?.especialidad);
@@ -84,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCrearNovedad.addEventListener('click', mostrarFormularioNovedad);
     }
     if (formNovedad) formNovedad.addEventListener('submit', publicarNovedad);
+    if (btnCancelarNovedad) btnCancelarNovedad.addEventListener('click', cerrarFormularioNovedad);
     document.querySelectorAll('[data-novedades-close]').forEach(button => button.addEventListener('click', () => cerrarModal(novedadesModal)));
     if (novedadesModal) novedadesModal.addEventListener('click', event => { if (event.target === novedadesModal) cerrarModal(novedadesModal); });
 
@@ -93,6 +98,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.querySelectorAll('[data-entity-new], #btn-gestionar-empleados').forEach(control => {
         control.hidden = !puedeCrearCitas;
+    });
+    document.querySelectorAll('form').forEach(formulario => {
+        formulario.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' || event.target.tagName === 'TEXTAREA' || formulario.checkValidity()) return;
+            event.preventDefault();
+            formulario.reportValidity();
+        });
     });
     if (agendaAnterior) agendaAnterior.addEventListener('click', () => cambiarPeriodoAgenda(-1));
     if (agendaSiguiente) agendaSiguiente.addEventListener('click', () => cambiarPeriodoAgenda(1));
@@ -548,6 +560,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function abrirEliminarEmpleado(empleado) {
         if (!puedeCrearCitas || !empleado) return;
+        if (String(empleado.idEmpleado) === String(empleadoSesion?.idEmpleado)) {
+            mostrarMensaje(empleadoMensaje, 'No puedes eliminar el usuario con el que tienes la sesion iniciada.', true);
+            return;
+        }
         empleadoPendienteEliminar = empleado.idEmpleado;
         if (empleadoEliminarTexto) empleadoEliminarTexto.textContent = `¿Seguro que deseas eliminar a ${empleado.nombre} ${empleado.apellido || ''}? Esta acción no se puede deshacer.`;
         abrirModal(modalEmpleadoEliminar);
@@ -1023,6 +1039,84 @@ document.addEventListener('DOMContentLoaded', () => {
             await abrirNovedadesActualizadas();
         } catch (error) {
             mostrarMensaje(novedadMensaje, error.message, true);
+        }
+    }
+
+    // Version con administracion de novedades. Estas acciones solo se muestran
+    // a empleados de Administracion y el servidor vuelve a validar el permiso.
+    function mostrarNovedades(novedades) {
+        if (!novedadesList) return;
+        if (!novedades.length) {
+            novedadesList.innerHTML = '<p>No hay novedades publicadas.</p>';
+            return;
+        }
+        novedadesList.innerHTML = novedades.map(novedad => `
+            <article class="novedad-item">
+                <span class="novedad-icon">📢</span>
+                <div><h4>${escapeHtml(novedad.titulo)}</h4><p>${escapeHtml(novedad.descripcion)}</p><p><small>Publicado por ${escapeHtml(novedad.autor || 'Administracion')}</small></p></div>
+                ${puedePublicarNovedades ? `<div class="row-actions"><button class="btn-icon edit" type="button" data-editar-novedad="${novedad.idNovedad}" aria-label="Editar novedad" title="Editar">✎</button><button class="btn-icon delete" type="button" data-eliminar-novedad="${novedad.idNovedad}" aria-label="Eliminar novedad" title="Eliminar">×</button></div>` : ''}
+            </article>`).join('');
+        novedadesList.querySelectorAll('[data-editar-novedad]').forEach(button => button.addEventListener('click', () => {
+            const novedad = novedades.find(item => String(item.idNovedad) === button.dataset.editarNovedad);
+            if (novedad) mostrarFormularioNovedad(novedad);
+        }));
+        novedadesList.querySelectorAll('[data-eliminar-novedad]').forEach(button => button.addEventListener('click', () => eliminarNovedad(button.dataset.eliminarNovedad)));
+    }
+
+    function mostrarFormularioNovedad(novedad = null) {
+        if (!puedePublicarNovedades || !formNovedad) return;
+        formNovedad.reset();
+        if (novedad) {
+            novedadId.value = novedad.idNovedad;
+            novedadTitulo.value = novedad.titulo || '';
+            novedadDescripcion.value = novedad.descripcion || '';
+        }
+        if (novedadFormTitulo) novedadFormTitulo.textContent = novedad ? 'Editar novedad' : 'Publicar novedad';
+        if (btnGuardarNovedad) btnGuardarNovedad.textContent = novedad ? 'Guardar cambios' : 'Publicar';
+        if (btnCancelarNovedad) btnCancelarNovedad.hidden = false;
+        formNovedad.hidden = false;
+        mostrarMensaje(novedadMensaje, '', false);
+        novedadTitulo.focus();
+    }
+
+    function cerrarFormularioNovedad() {
+        if (!formNovedad) return;
+        formNovedad.reset();
+        if (novedadId) novedadId.value = '';
+        if (btnCancelarNovedad) btnCancelarNovedad.hidden = true;
+        formNovedad.hidden = true;
+        mostrarMensaje(novedadMensaje, '', false);
+    }
+
+    async function publicarNovedad(event) {
+        event.preventDefault();
+        if (!empleadoSesion?.idEmpleado || !puedePublicarNovedades) return;
+        if (!formNovedad.checkValidity()) return formNovedad.reportValidity();
+        const editando = Boolean(novedadId?.value);
+        try {
+            const response = await fetch(editando ? `/app/novedad/${novedadId.value}` : '/app/novedad', {
+                method: editando ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json', ...encabezadosSesion() },
+                body: JSON.stringify({ titulo: novedadTitulo.value.trim(), descripcion: novedadDescripcion.value.trim() })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.mensaje || 'No fue posible guardar la novedad.');
+            cerrarFormularioNovedad();
+            await abrirNovedadesActualizadas();
+        } catch (error) {
+            mostrarMensaje(novedadMensaje, error.message, true);
+        }
+    }
+
+    async function eliminarNovedad(idNovedad) {
+        if (!puedePublicarNovedades || !confirm('¿Eliminar esta novedad?')) return;
+        try {
+            const response = await fetch(`/app/novedad/${idNovedad}`, { method: 'DELETE', headers: encabezadosSesion() });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.mensaje || 'No fue posible eliminar la novedad.');
+            await abrirNovedadesActualizadas();
+        } catch (error) {
+            alert(error.message || 'No fue posible eliminar la novedad.');
         }
     }
 

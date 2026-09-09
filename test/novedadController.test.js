@@ -37,4 +37,22 @@ describe('POST /app/novedad', () => {
         expect(respuesta.body.idNovedad).toBe(3);
         expect(mockConnection.query.mock.calls[2][1]).toEqual(['Aviso', 'Prueba', 7]);
     });
+
+    it('actualiza una novedad con titulo y descripcion validos', async () => {
+        responder({ affectedRows: 1 });
+        const respuesta = await request(app)
+            .put('/app/novedad/3')
+            .send({ titulo: 'Nuevo aviso', descripcion: 'Descripcion actualizada' });
+
+        expect(respuesta.statusCode).toBe(200);
+        expect(mockConnection.query.mock.calls[0][1]).toEqual(['Nuevo aviso', 'Descripcion actualizada', '3']);
+    });
+
+    it('elimina una novedad existente', async () => {
+        responder({ affectedRows: 1 });
+        const respuesta = await request(app).delete('/app/novedad/3');
+
+        expect(respuesta.statusCode).toBe(200);
+        expect(mockConnection.query.mock.calls[0][1]).toEqual(['3']);
+    });
 });
