@@ -48,14 +48,17 @@
     }
 
     body.registro-page .form-container input,
+    body.registro-page .form-container select,
     body.registro-page .form-container button {
       width: 100%;
       max-width: 100%;
     }
 
     body.registro-page .form-container input {
-      margin-bottom: 0;
+        margin-bottom: 0;
     }
+
+    body.registro-page #registroMensaje { min-height: 1.2em; margin: 4px 0 0; }
 
     @media (max-width: 900px) {
       body.registro-page {
@@ -110,6 +113,11 @@
 
     <div class="form-container">
         <form id="registroForm">
+            <label for="tipo">Tipo de registro:</label>
+            <select id="tipo" name="tipo" required>
+                <option value="cliente">Cliente / paciente</option>
+                <option value="empleado">Empleado</option>
+            </select>
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" required>
 
@@ -128,7 +136,33 @@
             <label for="confirmPassword">Confirmar Contraseña:</label>
             <input type="password" id="confirmPassword" name="confirmPassword" required>
 
+            <div id="campos-cliente">
+                <label for="documentoIdentidad">Documento:</label>
+                <input type="text" id="documentoIdentidad" name="documentoIdentidad">
+
+                <label for="fechaNacimiento">Fecha de nacimiento:</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento">
+
+                <label for="genero">Género:</label>
+                <select id="genero" name="genero"><option value="">Selecciona una opción</option><option>Femenino</option><option>Masculino</option><option>Otro</option></select>
+
+                <label for="direccion">Dirección:</label>
+                <input type="text" id="direccion" name="direccion">
+            </div>
+
+            <div id="campos-empleado" hidden>
+                <label for="documento">Documento:</label>
+                <input type="text" id="documento" name="documento">
+
+                <label for="especialidad">Especialidad:</label>
+                <input type="text" id="especialidad" name="especialidad" placeholder="Ej. Odontología general">
+
+                <label for="usuario">Usuario:</label>
+                <input type="text" id="usuario" name="usuario" autocomplete="username">
+            </div>
+
             <button type="submit" class="boton boton-registro">Registrarse</button>
+            <p id="registroMensaje" role="status" aria-live="polite"></p>
         </form>
     </div>
 

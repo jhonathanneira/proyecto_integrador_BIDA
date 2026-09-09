@@ -10,6 +10,7 @@ const clienteRoutes = require('./routes/clienteRoutes');
 const tratamientoRoutes = require('./routes/tratamientoRoutes');
 const equipoOdontologicoRoutes = require('./routes/equipoOdontologicoRoutes');
 const novedadRoutes = require('./routes/novedadRoutes');
+const registroRoutes = require('./routes/registroRoutes');
 
 
 var app = express();
@@ -157,6 +158,7 @@ app.use('/app', clienteRoutes(connection));
 app.use('/app', tratamientoRoutes(connection));
 app.use('/app', equipoOdontologicoRoutes(connection));
 app.use('/app', novedadRoutes(connection));
+app.use('/app', registroRoutes(connection));
 
 // EXPORTAMOS LA APP
 module.exports = app;
