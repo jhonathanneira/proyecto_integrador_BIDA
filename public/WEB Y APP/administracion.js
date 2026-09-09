@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnNovedades) btnNovedades.addEventListener('click', abrirNovedadesActualizadas);
     if (btnCrearNovedad) {
         btnCrearNovedad.hidden = !puedePublicarNovedades;
-        btnCrearNovedad.addEventListener('click', mostrarFormularioNovedad);
+        btnCrearNovedad.addEventListener('click', () => mostrarFormularioNovedad(null));
     }
     if (formNovedad) formNovedad.addEventListener('submit', publicarNovedad);
     if (btnCancelarNovedad) btnCancelarNovedad.addEventListener('click', cerrarFormularioNovedad);
@@ -1063,14 +1063,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!empleadoSesion?.idEmpleado || !puedePublicarNovedades) return;
         if (!formNovedad.checkValidity()) return formNovedad.reportValidity();
         const editando = Boolean(novedadId?.value);
+        const datosNovedad = { titulo: novedadTitulo.value.trim(), descripcion: novedadDescripcion.value.trim() };
+        const opcionesSolicitud = {
+            headers: { 'Content-Type': 'application/json', ...encabezadosSesion() },
+            body: JSON.stringify(datosNovedad)
+        };
         try {
-            const response = await fetch(editando ? `/app/novedad/${novedadId.value}` : '/app/novedad', {
-                method: editando ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json', ...encabezadosSesion() },
-                body: JSON.stringify({ titulo: novedadTitulo.value.trim(), descripcion: novedadDescripcion.value.trim() })
+            let response = await fetch(editando ? `/app/novedad/${novedadId.value}` : '/app/novedad', {
+                ...opcionesSolicitud,
+                method: editando ? 'PUT' : 'POST'
             });
+
+            // La lista puede haberse actualizado o el registro haberse eliminado
+            // en otra sesión. En ese caso conservamos el contenido y lo publicamos.
+            if (editando && response.status === 404) {
+                response = await fetch('/app/novedad', { ...opcionesSolicitud, method: 'POST' });
+            }
+
             const data = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(data.mensaje || 'No fue posible guardar la novedad.');
+            if (!response.ok) throw new Error(data.mensaje || `No fue posible guardar la novedad (HTTP ${response.status}).`);
             cerrarFormularioNovedad();
             await abrirNovedadesActualizadas();
         } catch (error) {
