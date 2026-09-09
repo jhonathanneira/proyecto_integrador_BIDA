@@ -84,6 +84,13 @@ function formatearFecha(fecha) {
 }*/
 
 async function eliminarProducto(idProducto) {
+    const producto = productosPorId.get(String(idProducto));
+    const nombreProducto = producto?.nombre ? ` \"${producto.nombre}\"` : '';
+
+    if (!confirm(`¿Seguro que deseas eliminar el producto${nombreProducto}? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+
     try {
         const response = await fetch(`/app/producto/${idProducto}`, {
             method: 'DELETE'
@@ -93,12 +100,8 @@ async function eliminarProducto(idProducto) {
             throw new Error(`Error en la API: ${response.status}`);
         }
 
-         // Validar si la respuesta contiene JSON
-        const text = await response.text();
-        const data = text ? JSON.parse(text) : { mensaje: "¿Está seguro que desea eliminar el producto?" };
-
-        // Confirmación al usuario
-        confirm(data.mensaje);
+        // La API puede responder sin contenido al eliminar correctamente.
+        await response.text();
 
         // Recargar lista de productos
         cargarProductos();

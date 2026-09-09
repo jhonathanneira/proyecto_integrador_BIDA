@@ -713,6 +713,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     window.eliminarProducto = async function eliminarProducto(idProducto) {
+        if (!confirm('¿Seguro que deseas eliminar este producto? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
         try {
             const response = await fetch(`/app/producto/${idProducto}`, {
                 method: 'DELETE',
@@ -1005,43 +1009,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return String(rol || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() === 'administracion';
     }
 
-    function mostrarNovedades(novedades) {
-        if (!novedadesList) return;
-        if (!novedades.length) {
-            novedadesList.innerHTML = '<p>No hay novedades publicadas.</p>';
-            return;
-        }
-        novedadesList.innerHTML = novedades.map(novedad => `<article class="novedad-item"><span class="novedad-icon">📢</span><div><h4>${escapeHtml(novedad.titulo)}</h4><p>${escapeHtml(novedad.descripcion)}</p><p><small>Publicado por ${escapeHtml(novedad.autor || 'Administración')}</small></p></div></article>`).join('');
-    }
-
-    function mostrarFormularioNovedad() {
-        if (!puedePublicarNovedades || !formNovedad) return;
-        formNovedad.hidden = false;
-        mostrarMensaje(novedadMensaje, '', false);
-        novedadTitulo.focus();
-    }
-
-    async function publicarNovedad(event) {
-        event.preventDefault();
-        if (!empleadoSesion?.idEmpleado || !puedePublicarNovedades) return;
-        mostrarMensaje(novedadMensaje, 'Publicando...', false);
-        try {
-            const response = await fetch('/app/novedad', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('sesionToken') || ''}` },
-                body: JSON.stringify({ titulo: novedadTitulo.value.trim(), descripcion: novedadDescripcion.value.trim() })
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.mensaje || 'No fue posible publicar la novedad.');
-            formNovedad.reset();
-            mostrarMensaje(novedadMensaje, 'Novedad publicada.', false);
-            formNovedad.hidden = true;
-            await abrirNovedadesActualizadas();
-        } catch (error) {
-            mostrarMensaje(novedadMensaje, error.message, true);
-        }
-    }
-
     // Version con administracion de novedades. Estas acciones solo se muestran
     // a empleados de Administracion y el servidor vuelve a validar el permiso.
     function mostrarNovedades(novedades) {
@@ -1070,6 +1037,9 @@ document.addEventListener('DOMContentLoaded', () => {
             novedadId.value = novedad.idNovedad;
             novedadTitulo.value = novedad.titulo || '';
             novedadDescripcion.value = novedad.descripcion || '';
+        } else if (novedadId) {
+            // Evita reutilizar el id de una edición anterior al crear una novedad.
+            novedadId.value = '';
         }
         if (novedadFormTitulo) novedadFormTitulo.textContent = novedad ? 'Editar novedad' : 'Publicar novedad';
         if (btnGuardarNovedad) btnGuardarNovedad.textContent = novedad ? 'Guardar cambios' : 'Publicar';
