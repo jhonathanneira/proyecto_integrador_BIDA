@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(tbody, 'Cargando datos...');
 
         try {
-            const response = await fetch('/app/venta');
+            const response = await fetch('/app/venta', { headers: encabezadosSesion() });
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }

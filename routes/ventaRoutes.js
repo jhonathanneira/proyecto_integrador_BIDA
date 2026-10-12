@@ -1,24 +1,27 @@
 const express = require('express');
+const { requiereAdministracion } = require('./autorizacion');
 const ruta = express.Router();
 
 module.exports = (db) => {
+    const soloAdmin = requiereAdministracion(db);
 
     // ======================================
     // Metodo POST para registrar una venta con detalles y actualizar stock
-    ruta.post('/venta', async (req, res) => {
+    ruta.post('/venta', soloAdmin, async (req, res) => {
 
         // Obtenemos datos del body
         const { idEmpleado, idCliente, metodoPago, productos } = req.body;
 
         // Validación de datos obligatorios
-        if (!idEmpleado || !idCliente || !metodoPago || !productos || productos.length === 0) {
+        if (!idEmpleado || !idCliente || !metodoPago || !Array.isArray(productos) || productos.length === 0) {
             return res.status(400).send({ mensaje: 'Datos incompletos' });
         }
 
         // Calcular el total a pagar y validar detalles de los productos
         let totalPagar = 0;
         for (const item of productos) {
-            if (!item.idProducto || !item.cantidad || !item.precioUnitario || item.cantidad <= 0) {
+            if (!item.idProducto || !Number.isInteger(Number(item.cantidad)) || Number(item.cantidad) <= 0
+                || !Number.isFinite(Number(item.precioUnitario)) || Number(item.precioUnitario) <= 0) {
                 return res.status(400).send({ mensaje: 'Detalles del producto inválidos' });
             }
             totalPagar += item.cantidad * item.precioUnitario;
@@ -104,7 +107,7 @@ module.exports = (db) => {
     // metodo get para listar todas las ventas registradas
     //===================================
 
-    ruta.get('/venta', (req, res) => {
+    ruta.get('/venta', soloAdmin, (req, res) => {
         const sql = `
             SELECT 
                 V.idVenta,
@@ -138,7 +141,7 @@ module.exports = (db) => {
     //metodo get para consultar detalle de una venta por su id
     //===================================
 
-ruta.get('/venta/:idVenta', (req, res) => {
+ruta.get('/venta/:idVenta', soloAdmin, (req, res) => {
     const idVenta = req.params.idVenta;
 
     // consulta sql para obtener los productos

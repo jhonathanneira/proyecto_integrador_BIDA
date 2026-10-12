@@ -85,6 +85,47 @@ describe('Pruebas de integración - ventas', () => {
     expect(respuesta.body.mensaje).toBe('Detalles del producto inválidos');
   });
 
+  it('POST /app/venta rechaza precios negativos o cantidades decimales', async () => {
+    const respuesta = await request(app)
+      .post('/app/venta')
+      .send({ ...venta, productos: [{ idProducto: 15, cantidad: 1.5, precioUnitario: -45000 }] });
+
+    expect(respuesta.statusCode).toBe(400);
+    expect(respuesta.body.mensaje).toContain('Detalles del producto');
+    expect(mockConnection.query).not.toHaveBeenCalled();
+  });
+
+  it('POST /app/venta procesa varios productos en una sola transacción', async () => {
+    configurarVentaExitosa();
+    const respuesta = await request(app).post('/app/venta').send({
+      ...venta,
+      productos: [
+        { idProducto: 15, cantidad: 2, precioUnitario: 45000 },
+        { idProducto: 16, cantidad: 1, precioUnitario: 30000 }
+      ]
+    });
+
+    expect(respuesta.statusCode).toBe(201);
+    expect(respuesta.body.totalPagar).toBe('120000.00');
+    expect(mockConnection.query.mock.calls.filter(([sql]) => sql.toUpperCase().includes('INSERT INTO DETALLEVENTA')).length).toBe(2);
+    expect(mockConnection.query.mock.calls.some(([sql]) => sql === 'COMMIT')).toBe(true);
+  });
+
+  it('POST /app/venta revierte la transacción si falla el detalle', async () => {
+    mockConnection.query.mockImplementation((sql, valores, callback) => {
+      const responder = callbackDe(valores, callback);
+      const consulta = sql.toUpperCase();
+      if (consulta.includes('INSERT INTO VENTA')) return responder(null, { insertId: 778 });
+      if (consulta.includes('INSERT INTO DETALLEVENTA')) return responder({ code: 'ER_TEST' });
+      return responder(null, {});
+    });
+
+    const respuesta = await request(app).post('/app/venta').send(venta);
+
+    expect(respuesta.statusCode).toBe(500);
+    expect(mockConnection.query.mock.calls.some(([sql]) => sql === 'ROLLBACK')).toBe(true);
+  });
+
   it('POST /app/venta revierte la transacción cuando no hay inventario', async () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockConnection.query.mockImplementation((sql, valores, callback) => {

@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function cargarDatos(modulo) {
         const url = '/app/venta';
 
-        fetch(url)
+        const token = sessionStorage.getItem('sesionToken') || '';
+        fetch(url, { headers: { Authorization: `Bearer ${token}` } })
             .then(res => {
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 return res.json();
