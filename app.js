@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require ('express');
 const path = require('path');
 const mysql = require ('mysql2');
@@ -92,62 +93,41 @@ var connection = mysql.createConnection({
 
 });
 
-// EVITAR QUE LEVANTE EL PUERTO Y CONEXIÓN REAL SI ESTAMOS EN NUESTRAS PRUEBAS (JEST)
+
+/*
+ * INICIO DEL SERVIDOR BIDA
+ * Conexión a TiDB Cloud
+ * No modifica ni crea tablas automáticamente.
+ */
+
 if (process.env.NODE_ENV !== 'test') {
-    // Probamos la conexión real a la base de datos
+
     connection.connect(function (error) {
+
         if (error) {
-            throw error;
-        } else {
-            console.log('Conexión exitosa a la base de datos');
-
-            asegurarColumnaRol((errorRol) => {
-                if (errorRol) throw errorRol;
-
-            const sqlAgenda = `
-                CREATE TABLE IF NOT EXISTS cita (
-                    idCita INT AUTO_INCREMENT PRIMARY KEY,
-                    fecha DATE NOT NULL,
-                    hora TIME NOT NULL,
-                    paciente VARCHAR(150) NOT NULL,
-                    documento VARCHAR(30) DEFAULT NULL,
-                    telefono VARCHAR(30) DEFAULT NULL,
-                    idEmpleado INT DEFAULT NULL,
-                    tratamiento VARCHAR(150) NOT NULL,
-                    estado VARCHAR(30) NOT NULL DEFAULT 'Programada',
-                    observacion TEXT DEFAULT NULL,
-                    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    CONSTRAINT fk_cita_empleado
-                        FOREIGN KEY (idEmpleado) REFERENCES empleado(idEmpleado)
-                        ON UPDATE CASCADE
-                        ON DELETE SET NULL
-                )
-            `;
-
-            const sqlTratamiento = `CREATE TABLE IF NOT EXISTS tratamiento (idTratamiento INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(120) NOT NULL, descripcion TEXT DEFAULT NULL, categoria VARCHAR(100) DEFAULT NULL, costo DECIMAL(12,2) NOT NULL, duracionMinutos INT DEFAULT NULL, activo TINYINT(1) NOT NULL DEFAULT 1, createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
-            const sqlEquipo = `CREATE TABLE IF NOT EXISTS equipoOdontologico (idEquipo INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(120) NOT NULL, tipo VARCHAR(100) NOT NULL, marca VARCHAR(100) DEFAULT NULL, modelo VARCHAR(100) DEFAULT NULL, serial VARCHAR(100) DEFAULT NULL UNIQUE, fechaAdquisicion DATE DEFAULT NULL, estado VARCHAR(30) NOT NULL DEFAULT 'Disponible', ubicacion VARCHAR(120) DEFAULT NULL, proximoMantenimiento DATE DEFAULT NULL, observaciones TEXT DEFAULT NULL, createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`;
-            const sqlNovedad = `CREATE TABLE IF NOT EXISTS novedad (idNovedad INT AUTO_INCREMENT PRIMARY KEY, titulo VARCHAR(150) NOT NULL, descripcion TEXT NOT NULL, idEmpleado INT NOT NULL, createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, CONSTRAINT fk_novedad_empleado FOREIGN KEY (idEmpleado) REFERENCES empleado(idEmpleado) ON UPDATE CASCADE ON DELETE RESTRICT)`;
-
-            [sqlTratamiento, sqlEquipo, sqlNovedad].forEach((sqlTabla) => {
-                connection.query(sqlTabla, (errorTabla) => {
-                    if (errorTabla) console.error('Error al crear tablas de BIDA:', errorTabla);
-                });
-            });
-
-            connection.query(sqlAgenda, (agendaError) => {
-                if (agendaError) {
-                    throw agendaError;
-                }
-
-                // Probamos la conexión con servidor local
-                app.listen(puerto, '0.0.0.0', function () {
-                    console.log('Conexión con servidor ok en el puerto ' + puerto);
-                });
-            });
-            });
+            console.error(
+                'Error al conectar con TiDB:',
+                error.message
+            );
+            process.exit(1);
         }
+
+        console.log('Conexión exitosa con TiDB Cloud');
+
+        app.listen(puerto, '0.0.0.0', function () {
+            console.log(
+                'Servidor BIDA funcionando en el puerto ' + puerto
+            );
+
+            console.log(
+                'Abre: http://localhost:' + puerto
+            );
+        });
+
     });
+
 }
+
 
 // CONEXIÓN DE RUTAS (Pasamos la conexión de mysql)
 app.use('/app', productoRoutes(connection));
