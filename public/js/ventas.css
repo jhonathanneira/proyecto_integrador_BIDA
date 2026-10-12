@@ -4,3 +4,22 @@
     grid-template-columns: 0.8fr 1.4fr 1fr 1fr 1fr 0.9fr 0.9fr;
     min-width: 1050px;
 }
+
+.venta-modal[hidden] { display: none; }
+.venta-modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 1rem; background: rgba(15, 23, 42, .55); }
+.venta-modal-card { width: min(720px, 100%); max-height: 90vh; overflow: auto; padding: 1.5rem; border-radius: 16px; background: #fff; box-shadow: 0 20px 60px rgba(15, 23, 42, .25); }
+.venta-modal-header, .venta-modal-actions, .venta-item { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.venta-modal-header { margin-bottom: 1rem; }
+.venta-modal-header h2 { margin: 0; }
+.venta-cerrar { border: 0; background: transparent; font-size: 1.8rem; cursor: pointer; }
+.venta-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.venta-form-grid label { display: flex; flex-direction: column; gap: .35rem; font-weight: 600; }
+.venta-form-grid select, .venta-form-grid input { min-height: 2.5rem; padding: .45rem .6rem; border: 1px solid #cbd5e1; border-radius: 8px; }
+.venta-producto-fieldset { margin: 1rem 0; padding: 1rem; border: 1px solid #dbe3ec; border-radius: 10px; }
+.venta-producto-linea { grid-template-columns: 1fr 120px auto; align-items: end; }
+.venta-items { display: grid; gap: .5rem; margin-top: 1rem; }
+.venta-item { padding: .6rem .75rem; border-radius: 8px; background: #f1f5f9; }
+.venta-item button { border: 0; color: #b91c1c; background: transparent; cursor: pointer; }
+.venta-total { margin: 1rem 0; text-align: right; font-size: 1.2rem; }
+.venta-mensaje { min-height: 1.4rem; color: #b91c1c; }
+@media (max-width: 640px) { .venta-form-grid, .venta-producto-linea { grid-template-columns: 1fr; } }

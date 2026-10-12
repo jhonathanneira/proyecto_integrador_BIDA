@@ -10,7 +10,8 @@ module.exports = (db) => {
     ruta.post('/venta', soloAdmin, async (req, res) => {
 
         // Obtenemos datos del body
-        const { idEmpleado, idCliente, metodoPago, productos } = req.body;
+        const { idEmpleado: idEmpleadoEnviado, idCliente, metodoPago, productos } = req.body;
+        const idEmpleado = req.sesion?.idEmpleado || idEmpleadoEnviado;
 
         // Validación de datos obligatorios
         if (!idEmpleado || !idCliente || !metodoPago || !Array.isArray(productos) || productos.length === 0) {

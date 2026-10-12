@@ -82,6 +82,49 @@
     </div>
   </div>
 
+  <div class="venta-modal" id="modal-nueva-venta" hidden>
+    <div class="venta-modal-card" role="dialog" aria-modal="true" aria-labelledby="titulo-nueva-venta">
+      <div class="venta-modal-header">
+        <h2 id="titulo-nueva-venta">Registrar venta</h2>
+        <button type="button" class="venta-cerrar" id="btn-cerrar-venta" aria-label="Cerrar">&times;</button>
+      </div>
+      <form id="form-nueva-venta">
+        <div class="venta-form-grid">
+          <label>Cliente
+            <select id="venta-cliente" required><option value="">Cargando clientes...</option></select>
+          </label>
+          <label>Metodo de pago
+            <select id="venta-metodo-pago" required>
+              <option value="">Selecciona...</option>
+              <option value="EFECTIVO">Efectivo</option>
+              <option value="TARJETA">Tarjeta</option>
+              <option value="TRANSFERENCIA">Transferencia</option>
+            </select>
+          </label>
+        </div>
+        <fieldset class="venta-producto-fieldset">
+          <legend>Productos</legend>
+          <div class="venta-form-grid venta-producto-linea">
+            <label>Producto
+              <select id="venta-producto"><option value="">Cargando productos...</option></select>
+            </label>
+            <label>Cantidad
+              <input id="venta-cantidad" type="number" min="1" step="1" value="1">
+            </label>
+            <button type="button" class="toolbar-btn" id="btn-agregar-producto">Agregar</button>
+          </div>
+          <div id="venta-items" class="venta-items"><p>No hay productos agregados.</p></div>
+        </fieldset>
+        <div class="venta-total">Total: <strong id="venta-total">$0</strong></div>
+        <p id="mensaje-nueva-venta" class="venta-mensaje" role="alert"></p>
+        <div class="venta-modal-actions">
+          <button type="button" class="toolbar-btn" id="btn-cancelar-venta">Cancelar</button>
+          <button type="submit" class="toolbar-btn primary">Guardar venta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="ventas.js"></script>
 </body>
 </html>
