@@ -1,14 +1,24 @@
+require('dotenv').config();
+
 const mysql = require('mysql2/promise');
 
 const config = {
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT || 3308),
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'bida'
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined
 };
 
 async function ejecutar() {
+  const variablesRequeridas = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
+  const faltantes = variablesRequeridas.filter((variable) => !process.env[variable]);
+  if (faltantes.length) {
+    throw new Error(`Faltan variables de conexi\u00f3n en .env: ${faltantes.join(', ')}`);
+  }
+
+  console.log(`Destino de carga: ${config.host}:${config.port}/${config.database}${config.ssl ? ' (SSL)' : ''}`);
   const db = await mysql.createConnection(config);
   try {
     await db.beginTransaction();
