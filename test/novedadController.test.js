@@ -1,7 +1,7 @@
 const request = require('supertest');
 
 const mockConnection = { connect: jest.fn(), query: jest.fn() };
-jest.mock('mysql2', () => ({ createConnection: jest.fn(() => mockConnection) }));
+jest.mock('mysql2', () => ({ createPool: jest.fn(() => mockConnection) }));
 
 const app = require('../app');
 

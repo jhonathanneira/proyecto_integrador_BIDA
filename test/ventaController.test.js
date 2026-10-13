@@ -6,7 +6,7 @@ const mockConnection = {
 };
 
 jest.mock('mysql2', () => ({
-  createConnection: jest.fn(() => mockConnection)
+  createPool: jest.fn(() => mockConnection)
 }));
 
 const app = require('../app');

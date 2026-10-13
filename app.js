@@ -82,15 +82,20 @@ function asegurarColumnaRol(callback) {
 }
 
 // DEFINIMOS LOS PARÁMETROS DE CONEXIÓN A LA BASE DE DATOS 
-var connection = mysql.createConnection({
+// El pool reutiliza conexiones y reemplaza las que TiDB cierre de forma temporal.
+// Conservamos el nombre `connection` para no cambiar las rutas existentes.
+var connection = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'bida',
     port: Number(process.env.DB_PORT || 3308),
-    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined
-
-
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
 });
 
 
@@ -102,7 +107,8 @@ var connection = mysql.createConnection({
 
 if (process.env.NODE_ENV !== 'test') {
 
-    connection.connect(function (error) {
+    // Un pool no utiliza connect(); esta consulta valida TiDB antes de atender solicitudes.
+    connection.query('SELECT 1 AS conexion', function (error) {
 
         if (error) {
             console.error(
