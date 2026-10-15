@@ -641,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             tbody.innerHTML = lista.map(venta => `
-                <div class="data-row">
+                <div class="data-row venta-fila" data-ver-venta="${venta.idVenta}" role="button" tabindex="0" aria-label="Ver detalle de la venta ${venta.idVenta}">
                     <div><div class="main-text">${venta.idVenta || ''}</div></div>
                     <div><div class="main-text">${venta.fechaHora || ''}</div></div>
                     <div><div class="main-text" style="font-size: 1.05rem; color: #005792;">$${parseFloat(venta.totalPagar || 0).toLocaleString('es-CO')}</div></div>
@@ -651,11 +651,55 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div><div class="main-text">${venta.idCliente || ''}</div></div>
                 </div>
             `).join('');
+            tbody.querySelectorAll('[data-ver-venta]').forEach(fila => {
+                const abrir = () => abrirDetalleVenta(fila.dataset.verVenta);
+                fila.addEventListener('click', abrir);
+                fila.addEventListener('keydown', evento => {
+                    if (evento.key === 'Enter' || evento.key === ' ') {
+                        evento.preventDefault();
+                        abrir();
+                    }
+                });
+            });
         } catch (error) {
             console.error('Error al cargar ventas:', error);
             tbody.innerHTML = '<div class="data-row">Error al cargar ventas desde la base de datos.</div>';
         }
     }
+
+    const modalDetalleVenta = document.getElementById('modal-detalle-venta');
+    const contenidoDetalleVenta = document.getElementById('detalle-venta-contenido');
+    const tituloDetalleVenta = document.getElementById('detalle-venta-titulo');
+    const cerrarDetalleVenta = () => {
+        modalDetalleVenta?.classList.remove('is-open');
+        modalDetalleVenta?.setAttribute('aria-hidden', 'true');
+    };
+    async function abrirDetalleVenta(idVenta) {
+        modalDetalleVenta?.classList.add('is-open');
+        modalDetalleVenta?.setAttribute('aria-hidden', 'false');
+        tituloDetalleVenta.textContent = `Venta #${idVenta}`;
+        contenidoDetalleVenta.innerHTML = '<p>Cargando detalle...</p>';
+        try {
+            const respuesta = await fetch(`/app/venta/${idVenta}`, { headers: encabezadosSesion() });
+            const venta = await respuesta.json();
+            if (!respuesta.ok) throw new Error(venta.mensaje || 'No fue posible consultar la venta.');
+            contenidoDetalleVenta.innerHTML = `
+                <div class="detalle-venta-resumen">
+                    <p><strong>Cliente:</strong> ${venta.nombreCliente || 'No registrado'}</p>
+                    <p><strong>Empleado:</strong> ${venta.nombreEmpleado || 'No registrado'}</p>
+                    <p><strong>Fecha:</strong> ${venta.fechaHora || ''}</p>
+                    <p><strong>Método de pago:</strong> ${venta.metodoPago || ''}</p>
+                </div>
+                <div class="detalle-venta-tabla">
+                    <div class="detalle-venta-cabecera"><span>Producto</span><span>Código</span><span>Cantidad</span><span>Precio unitario</span><span>Subtotal</span></div>
+                    ${venta.productos.map(producto => `<div class="detalle-venta-linea"><span>${producto.nombreProducto || ''}</span><span>${producto.codigoBarra || ''}</span><span>${producto.cantidad}</span><span>${dineroVenta(producto.precioUnitario)}</span><strong>${dineroVenta(producto.subtotalLinea)}</strong></div>`).join('')}
+                </div>
+                <p class="venta-total-admin">Total pagado: <strong>${dineroVenta(venta.totalPagar)}</strong></p>`;
+        } catch (error) {
+            contenidoDetalleVenta.innerHTML = `<p class="modal-message">${error.message}</p>`;
+        }
+    }
+    document.querySelectorAll('[data-detalle-venta-close]').forEach(boton => boton.addEventListener('click', cerrarDetalleVenta));
 
     // Registro de ventas dentro del panel principal de Administracion.
     const modalVenta = document.getElementById('modal-venta');
