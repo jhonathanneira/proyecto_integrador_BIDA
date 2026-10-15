@@ -126,6 +126,7 @@
           <h2>Registro de Ventas</h2>
           <p>Revisa las ventas registradas y su estado general.</p>
         </div>
+        <div class="module-toolbar"><button class="toolbar-btn primary" type="button" id="btn-nueva-venta">+ Nueva venta</button></div>
         <div class="data-table-container">
           <div class="data-table-head head-ventas">
             <span>ID Venta</span>
@@ -266,6 +267,21 @@
     <div class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="modal-entidad-titulo">
       <div class="modal-header"><div><p class="modal-eyebrow" id="modal-entidad-modulo">Administración</p><h3 id="modal-entidad-titulo">Nuevo registro</h3></div><button class="modal-close" type="button" data-entity-close aria-label="Cerrar">×</button></div>
       <form id="form-entidad" class="modal-form modal-form-grid"><div id="campos-entidad" class="entity-fields"></div><p id="entidad-mensaje" class="modal-message modal-message-wide" aria-live="polite"></p><div class="modal-actions modal-actions-wide"><button class="toolbar-btn" type="button" data-entity-close>Cancelar</button><button class="toolbar-btn primary" type="submit">Guardar</button></div></form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-venta" aria-hidden="true">
+    <div class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="venta-modal-titulo">
+      <div class="modal-header"><div><p class="modal-eyebrow">Registro de ventas</p><h3 id="venta-modal-titulo">Nueva venta</h3></div><button class="modal-close" type="button" data-venta-close aria-label="Cerrar">×</button></div>
+      <form id="form-venta" class="modal-form">
+        <label>Cliente<select id="venta-cliente" required><option value="">Cargando clientes...</option></select></label>
+        <label>Método de pago<select id="venta-metodo-pago" required><option value="">Selecciona...</option><option value="EFECTIVO">Efectivo</option><option value="TARJETA">Tarjeta</option><option value="TRANSFERENCIA">Transferencia</option></select></label>
+        <div class="venta-add-row"><label>Producto<select id="venta-producto"><option value="">Cargando productos...</option></select></label><label>Cantidad<input id="venta-cantidad" type="number" min="1" step="1" value="1"></label><button id="btn-venta-agregar" class="toolbar-btn" type="button">Agregar</button></div>
+        <div id="venta-items" class="venta-items"><p>No hay productos agregados.</p></div>
+        <p class="venta-total-admin">Total: <strong id="venta-total">$0</strong></p>
+        <p id="venta-mensaje" class="modal-message" aria-live="polite"></p>
+        <div class="modal-actions"><button class="toolbar-btn" type="button" data-venta-close>Cancelar</button><button class="toolbar-btn primary" type="submit">Guardar venta</button></div>
+      </form>
     </div>
   </div>
 

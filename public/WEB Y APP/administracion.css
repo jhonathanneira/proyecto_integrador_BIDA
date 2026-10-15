@@ -457,7 +457,15 @@ body {
 }
 
 .module-toolbar { display: flex; justify-content: flex-end; }
+.venta-add-row { display: grid; grid-template-columns: minmax(0, 1fr) 120px auto; gap: 12px; align-items: end; }
+.venta-items { display: grid; gap: 8px; margin-top: 4px; }
+.venta-items p { margin: 0; color: #64748b; }
+.venta-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #f1f5f9; color: #334155; }
+.venta-item strong { margin-left: auto; }
+.venta-item button { border: 0; background: transparent; color: #b91c1c; font: inherit; cursor: pointer; }
+.venta-total-admin { margin: 4px 0; text-align: right; font-size: 1.1rem; color: #0f172a; }
 .entity-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; grid-column: 1 / -1; }
 .entity-fields label { display: grid; gap: 6px; font-weight: 700; color: #334155; }
 .entity-fields label.full-width { grid-column: 1 / -1; }
 @media (max-width: 640px) { .entity-fields { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .venta-add-row { grid-template-columns: 1fr; } }

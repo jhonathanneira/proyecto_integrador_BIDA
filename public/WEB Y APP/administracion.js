@@ -657,6 +657,89 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Registro de ventas dentro del panel principal de Administracion.
+    const modalVenta = document.getElementById('modal-venta');
+    const formVenta = document.getElementById('form-venta');
+    const ventaCliente = document.getElementById('venta-cliente');
+    const ventaProducto = document.getElementById('venta-producto');
+    const ventaCantidad = document.getElementById('venta-cantidad');
+    const ventaItems = document.getElementById('venta-items');
+    const ventaTotal = document.getElementById('venta-total');
+    const ventaMensaje = document.getElementById('venta-mensaje');
+    const detalleVenta = [];
+    let productosVenta = [];
+
+    const dineroVenta = valor => Number(valor || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+    const abrirModalVenta = async () => {
+        modalVenta?.classList.add('is-open');
+        modalVenta?.setAttribute('aria-hidden', 'false');
+        ventaMensaje.textContent = '';
+        try {
+            const [respuestaProductos, respuestaClientes] = await Promise.all([
+                fetch('/app/producto', { headers: encabezadosSesion() }),
+                fetch('/app/cliente', { headers: encabezadosSesion() })
+            ]);
+            if (!respuestaProductos.ok || !respuestaClientes.ok) throw new Error('No fue posible cargar clientes o productos.');
+            productosVenta = await respuestaProductos.json();
+            const clientesData = await respuestaClientes.json();
+            const clientes = clientesData.clientes || clientesData;
+            ventaProducto.innerHTML = productosVenta.length ? productosVenta.map(producto => `<option value="${producto.idProducto}">${producto.nombre} - ${dineroVenta(producto.precioVenta)}</option>`).join('') : '<option value="">No hay productos</option>';
+            ventaCliente.innerHTML = clientes.length ? `<option value="">Selecciona...</option>${clientes.map(cliente => `<option value="${cliente.idCliente}">${cliente.nombre} ${cliente.apellido || ''}</option>`).join('')}` : '<option value="">No hay clientes</option>';
+        } catch (error) {
+            ventaMensaje.textContent = error.message;
+        }
+    };
+    const cerrarModalVenta = () => {
+        modalVenta?.classList.remove('is-open');
+        modalVenta?.setAttribute('aria-hidden', 'true');
+        formVenta?.reset();
+        detalleVenta.length = 0;
+        renderizarDetalleVenta();
+        ventaMensaje.textContent = '';
+    };
+    const renderizarDetalleVenta = () => {
+        ventaItems.innerHTML = detalleVenta.length ? detalleVenta.map((item, indice) => `<div class="venta-item"><span>${item.nombre} × ${item.cantidad}</span><strong>${dineroVenta(item.cantidad * item.precioUnitario)}</strong><button type="button" data-venta-quitar="${indice}">Quitar</button></div>`).join('') : '<p>No hay productos agregados.</p>';
+        ventaTotal.textContent = dineroVenta(detalleVenta.reduce((total, item) => total + item.cantidad * item.precioUnitario, 0));
+        ventaItems.querySelectorAll('[data-venta-quitar]').forEach(boton => boton.addEventListener('click', () => {
+            detalleVenta.splice(Number(boton.dataset.ventaQuitar), 1);
+            renderizarDetalleVenta();
+        }));
+    };
+    document.getElementById('btn-nueva-venta')?.addEventListener('click', abrirModalVenta);
+    document.querySelectorAll('[data-venta-close]').forEach(boton => boton.addEventListener('click', cerrarModalVenta));
+    document.getElementById('btn-venta-agregar')?.addEventListener('click', () => {
+        const producto = productosVenta.find(item => String(item.idProducto) === ventaProducto.value);
+        const cantidad = Number(ventaCantidad.value);
+        if (!producto || !Number.isInteger(cantidad) || cantidad <= 0) {
+            ventaMensaje.textContent = 'Selecciona un producto y una cantidad válida.';
+            return;
+        }
+        const existente = detalleVenta.find(item => item.idProducto === producto.idProducto);
+        if (existente) existente.cantidad += cantidad;
+        else detalleVenta.push({ idProducto: producto.idProducto, nombre: producto.nombre, cantidad, precioUnitario: Number(producto.precioVenta) });
+        ventaMensaje.textContent = '';
+        renderizarDetalleVenta();
+    });
+    formVenta?.addEventListener('submit', async evento => {
+        evento.preventDefault();
+        if (!ventaCliente.value || !detalleVenta.length) {
+            ventaMensaje.textContent = 'Selecciona un cliente y agrega al menos un producto.';
+            return;
+        }
+        try {
+            const respuesta = await fetch('/app/venta', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', ...encabezadosSesion() },
+                body: JSON.stringify({ idCliente: Number(ventaCliente.value), metodoPago: document.getElementById('venta-metodo-pago').value, productos: detalleVenta.map(item => ({ idProducto: item.idProducto, cantidad: item.cantidad })) })
+            });
+            const datos = await respuesta.json().catch(() => ({}));
+            if (!respuesta.ok) throw new Error(datos.mensaje || 'No fue posible registrar la venta.');
+            cerrarModalVenta();
+            cargarVentas();
+        } catch (error) {
+            ventaMensaje.textContent = error.message;
+        }
+    });
+
     function formatearFecha(fecha) {
         return new Date(fecha).toLocaleDateString('es-CO', {
             year: 'numeric',
