@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function cargarOpcionesVenta() {
         try {
             const [respuestaProductos, respuestaClientes] = await Promise.all([
-                fetch('/app/producto'),
-                fetch('/app/cliente')
+                fetch('/app/producto', { headers: encabezadosSesion() }),
+                fetch('/app/cliente', { headers: encabezadosSesion() })
             ]);
             if (!respuestaProductos.ok || !respuestaClientes.ok) throw new Error('No fue posible cargar productos o clientes.');
             productosDisponibles = await respuestaProductos.json();
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     idEmpleado: empleado.idEmpleado,
                     idCliente: Number(selectCliente.value),
                     metodoPago: document.getElementById('venta-metodo-pago').value,
-                    productos: itemsVenta.map(item => ({ idProducto: item.idProducto, cantidad: item.cantidad, precioUnitario: item.precioUnitario }))
+                    productos: itemsVenta.map(item => ({ idProducto: item.idProducto, cantidad: item.cantidad }))
                 })
             });
             const datos = await respuesta.json().catch(() => ({}));

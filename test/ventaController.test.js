@@ -23,6 +23,11 @@ function configurarVentaExitosa() {
     if (consulta.includes('START TRANSACTION') || consulta.includes('COMMIT') || consulta.includes('ROLLBACK')) {
       return responder(null, {});
     }
+    if (consulta.includes('FROM PRODUCTO P INNER JOIN INVENTARIO')) {
+      const idProducto = valores[0];
+      const precios = { 15: 45000, 16: 30000 };
+      return responder(null, [{ idProducto, idInventario: idProducto + 100, stockActual: 20, precioVenta: precios[idProducto] || 10000 }]);
+    }
     if (consulta.includes('INSERT INTO VENTA')) {
       return responder(null, { insertId: 777 });
     }
@@ -48,7 +53,7 @@ describe('Pruebas de integración - ventas', () => {
     idEmpleado: 1,
     idCliente: 3,
     metodoPago: 'TARJETA',
-    productos: [{ idProducto: 15, cantidad: 2, precioUnitario: 45000 }]
+    productos: [{ idProducto: 15, cantidad: 2 }]
   };
 
   beforeEach(() => {
@@ -79,16 +84,16 @@ describe('Pruebas de integración - ventas', () => {
   it('POST /app/venta valida cada detalle de producto', async () => {
     const respuesta = await request(app)
       .post('/app/venta')
-      .send({ ...venta, productos: [{ idProducto: 15, cantidad: 0, precioUnitario: 45000 }] });
+      .send({ ...venta, productos: [{ idProducto: 15, cantidad: 0 }] });
 
     expect(respuesta.statusCode).toBe(400);
     expect(respuesta.body.mensaje).toBe('Detalles del producto inválidos');
   });
 
-  it('POST /app/venta rechaza precios negativos o cantidades decimales', async () => {
+  it('POST /app/venta rechaza cantidades decimales', async () => {
     const respuesta = await request(app)
       .post('/app/venta')
-      .send({ ...venta, productos: [{ idProducto: 15, cantidad: 1.5, precioUnitario: -45000 }] });
+      .send({ ...venta, productos: [{ idProducto: 15, cantidad: 1.5 }] });
 
     expect(respuesta.statusCode).toBe(400);
     expect(respuesta.body.mensaje).toContain('Detalles del producto');
@@ -100,8 +105,8 @@ describe('Pruebas de integración - ventas', () => {
     const respuesta = await request(app).post('/app/venta').send({
       ...venta,
       productos: [
-        { idProducto: 15, cantidad: 2, precioUnitario: 45000 },
-        { idProducto: 16, cantidad: 1, precioUnitario: 30000 }
+        { idProducto: 15, cantidad: 2 },
+        { idProducto: 16, cantidad: 1 }
       ]
     });
 
@@ -115,6 +120,9 @@ describe('Pruebas de integración - ventas', () => {
     mockConnection.query.mockImplementation((sql, valores, callback) => {
       const responder = callbackDe(valores, callback);
       const consulta = sql.toUpperCase();
+      if (consulta.includes('FROM PRODUCTO P INNER JOIN INVENTARIO')) {
+        return responder(null, [{ idProducto: 15, idInventario: 115, stockActual: 20, precioVenta: 45000 }]);
+      }
       if (consulta.includes('INSERT INTO VENTA')) return responder(null, { insertId: 778 });
       if (consulta.includes('INSERT INTO DETALLEVENTA')) return responder({ code: 'ER_TEST' });
       return responder(null, {});
@@ -132,6 +140,9 @@ describe('Pruebas de integración - ventas', () => {
       const responder = callbackDe(valores, callback);
       const consulta = sql.toUpperCase();
 
+      if (consulta.includes('FROM PRODUCTO P INNER JOIN INVENTARIO')) {
+        return responder(null, [{ idProducto: 15, idInventario: 115, stockActual: 20, precioVenta: 45000 }]);
+      }
       if (consulta.includes('UPDATE INVENTARIO')) {
         return responder(null, { affectedRows: 0 });
       }
@@ -143,8 +154,8 @@ describe('Pruebas de integración - ventas', () => {
 
     const respuesta = await request(app).post('/app/venta').send(venta);
 
-    expect(respuesta.statusCode).toBe(500);
-    expect(respuesta.body.errorDetails).toContain('Stock insuficiente');
+    expect(respuesta.statusCode).toBe(409);
+    expect(respuesta.body.mensaje).toContain('Stock insuficiente');
     expect(mockConnection.query.mock.calls.some(([sql]) => sql === 'ROLLBACK')).toBe(true);
     consoleError.mockRestore();
   });
