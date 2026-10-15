@@ -23,6 +23,32 @@ module.exports = (connection) => {
         });
     });
 
+    ruta.get('/cliente/:id/resumen', (req, res) => {
+        connection.query('SELECT * FROM cliente WHERE idCliente = ?', [req.params.id], (errorCliente, filas) => {
+            if (errorCliente) return res.status(500).json({ mensaje: 'Error al consultar el cliente.', detalleError: errorCliente.code });
+            if (!filas.length) return res.status(404).json({ mensaje: 'Cliente no encontrado.' });
+            const cliente = filas[0];
+            connection.query(
+                `SELECT idCita, fecha, hora, tratamiento, estado FROM cita
+                 WHERE documento = ? ORDER BY fecha DESC, hora DESC LIMIT 10`,
+                [cliente.documentoIdentidad],
+                (errorCitas, citas) => {
+                    if (errorCitas) return res.status(500).json({ mensaje: 'Error al consultar las citas del cliente.', detalleError: errorCitas.code });
+                    connection.query(
+                        `SELECT idVenta, fechaHora, totalPagar, metodoPago, estado FROM venta
+                         WHERE idCliente = ? ORDER BY fechaHora DESC LIMIT 10`,
+                        [cliente.idCliente],
+                        (errorVentas, ventas) => {
+                            if (errorVentas) return res.status(500).json({ mensaje: 'Error al consultar las ventas del cliente.', detalleError: errorVentas.code });
+                            const totalCompras = ventas.reduce((total, venta) => total + Number(venta.totalPagar || 0), 0);
+                            return res.status(200).json({ cliente, citas, ventas, totalCompras });
+                        }
+                    );
+                }
+            );
+        });
+    });
+
     ruta.get('/cliente/:id', (req, res) => {
         connection.query('SELECT * FROM cliente WHERE idCliente = ?', [req.params.id], (error, filas) => {
             if (error) return res.status(500).json({ mensaje: 'Error al consultar el cliente.', detalleError: error.code });

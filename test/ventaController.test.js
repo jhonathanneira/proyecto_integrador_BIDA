@@ -160,6 +160,62 @@ describe('Pruebas de integración - ventas', () => {
     consoleError.mockRestore();
   });
 
+  it('POST /app/venta/:idVenta/anular anula la venta y restaura el inventario', async () => {
+    mockConnection.query.mockImplementation((sql, valores, callback) => {
+      const responder = callbackDe(valores, callback);
+      const consulta = sql.toUpperCase();
+      if (consulta.includes('START TRANSACTION') || consulta.includes('COMMIT')) return responder(null, {});
+      if (consulta.includes('SELECT ESTADO FROM VENTA')) return responder(null, [{ estado: 'FINALIZADA' }]);
+      if (consulta.includes('SELECT IDPRODUCTO, CANTIDAD FROM DETALLEVENTA')) return responder(null, [{ idProducto: 15, cantidad: 2 }]);
+      if (consulta.includes('UPDATE INVENTARIO')) return responder(null, { affectedRows: 1 });
+      if (consulta.includes("UPDATE VENTA SET ESTADO = 'ANULADA'")) return responder(null, { affectedRows: 1 });
+      return responder(null, {});
+    });
+
+    const respuesta = await request(app).post('/app/venta/777/anular').send({});
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body.mensaje).toContain('inventario restaurado');
+    expect(mockConnection.query.mock.calls.some(([sql]) => sql.toUpperCase().includes("UPDATE VENTA SET ESTADO = 'ANULADA'"))).toBe(true);
+    expect(mockConnection.query.mock.calls.some(([sql]) => sql.toUpperCase().includes('UPDATE INVENTARIO'))).toBe(true);
+  });
+
+  it('POST /app/venta/:idVenta/anular impide anular una venta ya anulada', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockConnection.query.mockImplementation((sql, valores, callback) => {
+      const responder = callbackDe(valores, callback);
+      const consulta = sql.toUpperCase();
+      if (consulta.includes('START TRANSACTION') || consulta.includes('ROLLBACK')) return responder(null, {});
+      if (consulta.includes('SELECT ESTADO FROM VENTA')) return responder(null, [{ estado: 'ANULADA' }]);
+      return responder(null, {});
+    });
+
+    const respuesta = await request(app).post('/app/venta/777/anular').send({});
+
+    expect(respuesta.statusCode).toBe(409);
+    expect(respuesta.body.mensaje).toContain('Solo se pueden anular');
+    expect(mockConnection.query.mock.calls.some(([sql]) => sql === 'ROLLBACK')).toBe(true);
+    consoleError.mockRestore();
+  });
+
+  it('GET /app/indicadores devuelve los totales del panel', async () => {
+    const resultados = [
+      [{ ventasHoy: '74000', ventasMes: '198000' }],
+      [{ citasHoy: 4, atendidasHoy: 2, canceladasHoy: 1 }],
+      [{ productosCriticos: 3 }],
+      [{ clientesRegistrados: 12 }]
+    ];
+    mockConnection.query.mockImplementation((sql, callback) => callback(null, resultados.shift()));
+
+    const respuesta = await request(app).get('/app/indicadores');
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.body).toEqual({
+      ventasHoy: 74000, ventasMes: 198000, citasHoy: 4,
+      atendidasHoy: 2, canceladasHoy: 1, productosCriticos: 3, clientesRegistrados: 12
+    });
+  });
+
   it('GET /app/venta devuelve el listado de ventas', async () => {
     responderUnaConsulta([{ idVenta: 50, totalPagar: '90000.00', metodoPago: 'TARJETA' }]);
 

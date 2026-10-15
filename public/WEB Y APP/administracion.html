@@ -44,6 +44,12 @@
           <h2>Agenda Odontológica</h2>
           <p>Programa, consulta y administra las citas de la clínica desde la base de datos.</p>
         </div>
+        <section class="indicadores-grid" aria-label="Indicadores de la clínica">
+          <article class="indicador-card"><span>Ventas de hoy</span><strong id="indicador-ventas-hoy">$0</strong><small id="indicador-ventas-mes">Mes: $0</small></article>
+          <article class="indicador-card"><span>Citas de hoy</span><strong id="indicador-citas-hoy">0</strong><small id="indicador-citas-estado">0 atendidas · 0 canceladas</small></article>
+          <article class="indicador-card"><span>Inventario crítico</span><strong id="indicador-inventario">0</strong><small>Productos en mínimo o agotados</small></article>
+          <article class="indicador-card"><span>Clientes registrados</span><strong id="indicador-clientes">0</strong><small>Base de pacientes activa</small></article>
+        </section>
         <div class="agenda-summary-bar">
           <div>
             <span class="summary-label">Citas registradas</span>
@@ -126,6 +132,14 @@
           <h2>Registro de Ventas</h2>
           <p>Revisa las ventas registradas y su estado general.</p>
         </div>
+        <div class="ventas-filtros">
+          <input id="ventas-buscar" type="search" placeholder="Buscar por ID, cliente o pago">
+          <input id="ventas-fecha" type="date" aria-label="Filtrar por fecha">
+          <select id="ventas-metodo"><option value="">Todos los métodos</option><option value="EFECTIVO">Efectivo</option><option value="TARJETA">Tarjeta</option><option value="TRANSFERENCIA">Transferencia</option></select>
+          <select id="ventas-estado"><option value="">Todos los estados</option><option value="FINALIZADA">Finalizada</option><option value="ANULADA">Anulada</option></select>
+          <button class="toolbar-btn" id="btn-exportar-ventas" type="button">Exportar CSV</button>
+        </div>
+        <p class="ventas-resumen" id="ventas-resumen">Cargando ventas...</p>
         <div class="module-toolbar"><button class="toolbar-btn primary" type="button" id="btn-nueva-venta">+ Nueva venta</button></div>
         <div class="data-table-container">
           <div class="data-table-head head-ventas">
@@ -240,6 +254,14 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="modal-detalle-cita" aria-hidden="true">
+    <div class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="detalle-cita-titulo">
+      <div class="modal-header"><div><p class="modal-eyebrow">Detalle de cita</p><h3 id="detalle-cita-titulo">Cita</h3></div><button class="modal-close" type="button" data-detalle-cita-close aria-label="Cerrar">×</button></div>
+      <div id="detalle-cita-contenido" class="detalle-cita-contenido"><p>Cargando cita...</p></div>
+      <div class="modal-actions"><button class="toolbar-btn" type="button" data-detalle-cita-close>Cerrar</button></div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="modal-empleado" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="empleado-modal-titulo">
       <div class="modal-header"><div><p class="modal-eyebrow">Gestión de empleados</p><h3 id="empleado-modal-titulo">Editar empleado</h3></div><button class="modal-close" type="button" data-empleado-close aria-label="Cerrar">×</button></div>
@@ -290,6 +312,22 @@
       <div class="modal-header"><div><p class="modal-eyebrow">Detalle de venta</p><h3 id="detalle-venta-titulo">Venta</h3></div><button class="modal-close" type="button" data-detalle-venta-close aria-label="Cerrar">×</button></div>
       <div id="detalle-venta-contenido" class="detalle-venta-contenido"><p>Cargando detalle...</p></div>
       <div class="modal-actions"><button class="toolbar-btn" type="button" data-detalle-venta-close>Cerrar</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-detalle-producto" aria-hidden="true">
+    <div class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="detalle-producto-titulo">
+      <div class="modal-header"><div><p class="modal-eyebrow">Detalle de producto</p><h3 id="detalle-producto-titulo">Producto</h3></div><button class="modal-close" type="button" data-detalle-producto-close aria-label="Cerrar">×</button></div>
+      <div id="detalle-producto-contenido" class="detalle-producto-contenido"><p>Cargando detalle...</p></div>
+      <div class="modal-actions"><button class="toolbar-btn" type="button" data-detalle-producto-close>Cerrar</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-detalle-cliente" aria-hidden="true">
+    <div class="modal-card modal-card-large" role="dialog" aria-modal="true" aria-labelledby="detalle-cliente-titulo">
+      <div class="modal-header"><div><p class="modal-eyebrow">Ficha de cliente</p><h3 id="detalle-cliente-titulo">Cliente</h3></div><button class="modal-close" type="button" data-detalle-cliente-close aria-label="Cerrar">×</button></div>
+      <div id="detalle-cliente-contenido" class="detalle-cliente-contenido"><p>Cargando ficha...</p></div>
+      <div class="modal-actions"><button class="toolbar-btn" type="button" data-detalle-cliente-close>Cerrar</button></div>
     </div>
   </div>
 

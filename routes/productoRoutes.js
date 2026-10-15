@@ -46,6 +46,35 @@ ruta.get('/producto', (req, res)=>{
 
 
 
+ruta.get('/producto/:idProducto/resumen', (req, res) => {
+    const idProducto = req.params.idProducto;
+    connection.query('SELECT * FROM producto WHERE idProducto = ?', [idProducto], (errorProducto, filasProducto) => {
+        if (errorProducto) return res.status(500).send({ message: 'Error al consultar el producto.', detalleError: errorProducto.code });
+        if (!filasProducto.length) return res.status(404).send({ message: `Producto con ID ${idProducto} no encontrado.` });
+
+        connection.query(
+            `SELECT idInventario, ubicacion, stockActual, stockMinimo, fechaUltimaActualizacion
+             FROM inventario WHERE idProducto = ? ORDER BY ubicacion`,
+            [idProducto],
+            (errorInventario, inventarios) => {
+                if (errorInventario) return res.status(500).send({ message: 'Error al consultar el inventario.', detalleError: errorInventario.code });
+                connection.query(
+                    `SELECT V.idVenta, V.fechaHora, DV.cantidad, DV.precioUnitario, DV.subTotal
+                     FROM detalleventa DV INNER JOIN venta V ON V.idVenta = DV.idVenta
+                     WHERE DV.idProducto = ? ORDER BY V.fechaHora DESC LIMIT 10`,
+                    [idProducto],
+                    (errorVentas, ventas) => {
+                        if (errorVentas) return res.status(500).send({ message: 'Error al consultar las ventas del producto.', detalleError: errorVentas.code });
+                        const stockActual = inventarios.reduce((total, item) => total + Number(item.stockActual || 0), 0);
+                        const stockMinimo = inventarios.reduce((total, item) => total + Number(item.stockMinimo || 0), 0);
+                        return res.status(200).send({ producto: filasProducto[0], stockActual, stockMinimo, inventarios, ventas });
+                    }
+                );
+            }
+        );
+    });
+});
+
 ruta.get('/producto/:idProducto', (req, res) => {
 
     const idProducto = req.params.idProducto;

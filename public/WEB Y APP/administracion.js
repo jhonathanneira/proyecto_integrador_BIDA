@@ -41,6 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const agendaObservacion = document.getElementById('agenda-observacion');
     const agendaTotal = document.getElementById('agenda-total-citas');
     const agendaPendientesHoy = document.getElementById('agenda-pendientes-hoy');
+    const indicadorVentasHoy = document.getElementById('indicador-ventas-hoy');
+    const indicadorVentasMes = document.getElementById('indicador-ventas-mes');
+    const indicadorCitasHoy = document.getElementById('indicador-citas-hoy');
+    const indicadorCitasEstado = document.getElementById('indicador-citas-estado');
+    const indicadorInventario = document.getElementById('indicador-inventario');
+    const indicadorClientes = document.getElementById('indicador-clientes');
     const btnNuevaCita = document.getElementById('btn-nueva-cita');
     const agendaCalendar = document.getElementById('agenda-calendar');
     const agendaPeriodo = document.getElementById('agenda-periodo');
@@ -64,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let agendaVista = 'semana';
     let agendaFechaReferencia = new Date();
     let empleadoPendienteEliminar = null;
+    let ventasRegistradas = [];
 
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
@@ -235,12 +242,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             renderizarAgenda(data);
+            await cargarIndicadores();
             await cargarEmpleadosEnSelect();
         } catch (error) {
             console.error('No fue posible cargar la agenda:', error);
             if (tbody) {
                 tbody.innerHTML = '<div class="data-row">Error al cargar la agenda desde la base de datos.</div>';
             }
+        }
+    }
+
+    async function cargarIndicadores() {
+        try {
+            const respuesta = await fetch('/app/indicadores', { headers: encabezadosSesion() });
+            if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+            const datos = await respuesta.json();
+            const formatoMoneda = valor => Number(valor || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+            if (indicadorVentasHoy) indicadorVentasHoy.textContent = formatoMoneda(datos.ventasHoy);
+            if (indicadorVentasMes) indicadorVentasMes.textContent = `Mes: ${formatoMoneda(datos.ventasMes)}`;
+            if (indicadorCitasHoy) indicadorCitasHoy.textContent = datos.citasHoy || 0;
+            if (indicadorCitasEstado) indicadorCitasEstado.textContent = `${datos.atendidasHoy || 0} atendidas · ${datos.canceladasHoy || 0} canceladas`;
+            if (indicadorInventario) indicadorInventario.textContent = datos.productosCriticos || 0;
+            if (indicadorClientes) indicadorClientes.textContent = datos.clientesRegistrados || 0;
+        } catch (error) {
+            console.warn('No fue posible cargar los indicadores:', error.message);
         }
     }
 
@@ -287,6 +312,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (agendaPendientesHoy) agendaPendientesHoy.textContent = String(pendientesHoy);
 
         tbody.innerHTML = lista.map(cita => renderFilaAgenda(cita)).join('');
+        tbody.querySelectorAll('[data-cita-id]').forEach(fila => {
+            fila.addEventListener('click', evento => { if (!evento.target.closest('button')) abrirDetalleCita(fila.dataset.citaId); });
+            fila.addEventListener('keydown', evento => {
+                if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); abrirDetalleCita(fila.dataset.citaId); }
+            });
+        });
         renderizarCalendarioAgenda();
     }
 
@@ -344,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         agendaCalendar.innerHTML = `${encabezados}<div class="calendar-grid">${dias.map(dia => renderizarDiaCalendario(dia, hoy)).join('')}</div>`;
         agendaCalendar.querySelectorAll('[data-calendar-cita]').forEach(button => button.addEventListener('click', () => {
             const cita = citasAgenda.find(item => String(item.idCita) === button.dataset.calendarCita);
-            if (cita) abrirFormularioCita(cita);
+            if (cita) abrirDetalleCita(cita.idCita);
         }));
     }
 
@@ -357,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderFilaAgenda(cita) {
         return `
-            <div class="data-row" data-cita-id="${cita.idCita ?? ''}" data-fecha="${escapeHtml(cita.fecha ?? '')}" data-hora="${escapeHtml((cita.hora ?? '').toString().slice(0, 5))}" data-paciente="${escapeHtml(cita.paciente ?? '')}" data-documento="${escapeHtml(cita.documento ?? '')}" data-telefono="${escapeHtml(cita.telefono ?? '')}" data-id-empleado="${cita.idEmpleado ?? ''}" data-tratamiento="${escapeHtml(cita.tratamiento ?? '')}" data-estado="${escapeHtml(cita.estado ?? '')}" data-observacion="${escapeHtml(cita.observacion ?? '')}">
+            <div class="data-row cita-fila" data-cita-id="${cita.idCita ?? ''}" data-fecha="${escapeHtml(cita.fecha ?? '')}" data-hora="${escapeHtml((cita.hora ?? '').toString().slice(0, 5))}" data-paciente="${escapeHtml(cita.paciente ?? '')}" data-documento="${escapeHtml(cita.documento ?? '')}" data-telefono="${escapeHtml(cita.telefono ?? '')}" data-id-empleado="${cita.idEmpleado ?? ''}" data-tratamiento="${escapeHtml(cita.tratamiento ?? '')}" data-estado="${escapeHtml(cita.estado ?? '')}" data-observacion="${escapeHtml(cita.observacion ?? '')}" role="button" tabindex="0" aria-label="Ver detalle de la cita de ${escapeHtml(cita.paciente ?? '')}">
                 <div><div class="main-text">${formatearFecha(cita.fecha)}</div></div>
                 <div><div class="main-text">${formatearHora(cita.hora)}</div></div>
                 <div><div class="main-text">${cita.paciente ?? ''}</div></div>
@@ -370,6 +401,52 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
     }
+
+    const modalDetalleCita = document.getElementById('modal-detalle-cita');
+    const contenidoDetalleCita = document.getElementById('detalle-cita-contenido');
+    const tituloDetalleCita = document.getElementById('detalle-cita-titulo');
+    const cerrarDetalleCita = () => cerrarModal(modalDetalleCita);
+    async function abrirDetalleCita(idCita) {
+        abrirModal(modalDetalleCita);
+        contenidoDetalleCita.innerHTML = '<p>Cargando cita...</p>';
+        try {
+            const respuesta = await fetch(`/app/cita/${idCita}`, { headers: encabezadosSesion() });
+            const datos = await respuesta.json();
+            if (!respuesta.ok) throw new Error(datos.mensaje || 'No fue posible consultar la cita.');
+            const cita = datos.cita;
+            tituloDetalleCita.textContent = `${cita.paciente || 'Paciente'} · ${formatearFecha(cita.fecha)}`;
+            contenidoDetalleCita.innerHTML = `
+                <div class="detalle-cita-resumen"><p><strong>Fecha y hora:</strong> ${formatearFecha(cita.fecha)} ${formatearHora(cita.hora)}</p><p><strong>Estado:</strong> <span class="status-badge status-active">${cita.estado || 'Programada'}</span></p><p><strong>Paciente:</strong> ${cita.paciente || ''}</p><p><strong>Documento:</strong> ${cita.documento || 'No registrado'}</p><p><strong>Teléfono:</strong> ${cita.telefono || 'No registrado'}</p><p><strong>Profesional:</strong> ${cita.nombreEmpleado || 'Sin asignar'}</p><p><strong>Tratamiento:</strong> ${cita.tratamiento || ''}</p><p><strong>Observación:</strong> ${cita.observacion || 'Sin observaciones'}</p></div>
+                <div class="cita-acciones">${puedeCrearCitas ? `<button class="toolbar-btn primary" type="button" data-cita-estado="Confirmada">Confirmar</button><button class="toolbar-btn" type="button" data-cita-estado="Atendida">Marcar atendida</button><button class="toolbar-btn danger" type="button" data-cita-estado="Cancelada">Cancelar cita</button>` : ''}<button class="toolbar-btn" type="button" data-cita-cliente>Ver cliente</button><button class="toolbar-btn" type="button" data-cita-venta>Registrar venta</button></div>`;
+            contenidoDetalleCita.querySelectorAll('[data-cita-estado]').forEach(boton => boton.addEventListener('click', () => actualizarEstadoCita(cita, boton.dataset.citaEstado)));
+            contenidoDetalleCita.querySelector('[data-cita-cliente]')?.addEventListener('click', () => abrirClienteDeCita(cita, false));
+            contenidoDetalleCita.querySelector('[data-cita-venta]')?.addEventListener('click', () => abrirClienteDeCita(cita, true));
+        } catch (error) {
+            contenidoDetalleCita.innerHTML = `<p class="modal-message">${error.message}</p>`;
+        }
+    }
+    async function actualizarEstadoCita(cita, estado) {
+        try {
+            const respuesta = await fetch(`/app/cita/${cita.idCita}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...encabezadosSesion() }, body: JSON.stringify({ ...cita, estado }) });
+            const datos = await respuesta.json().catch(() => ({}));
+            if (!respuesta.ok) throw new Error(datos.mensaje || 'No fue posible actualizar la cita.');
+            cerrarDetalleCita();
+            await cargarAgenda();
+        } catch (error) { contenidoDetalleCita.innerHTML = `<p class="modal-message">${error.message}</p>`; }
+    }
+    async function abrirClienteDeCita(cita, registrarVenta) {
+        try {
+            const respuesta = await fetch('/app/cliente', { headers: encabezadosSesion() });
+            const datos = await respuesta.json();
+            const cliente = (datos.clientes || []).find(item => String(item.documentoIdentidad) === String(cita.documento));
+            if (!cliente) throw new Error('No hay un cliente registrado con el documento de este paciente.');
+            cerrarDetalleCita();
+            if (registrarVenta) return abrirModalVenta(cliente.idCliente);
+            await activarVista('clientes');
+            return abrirDetalleCliente(cliente.idCliente);
+        } catch (error) { contenidoDetalleCita.innerHTML = `<p class="modal-message">${error.message}</p>`; }
+    }
+    document.querySelectorAll('[data-detalle-cita-close]').forEach(boton => boton.addEventListener('click', cerrarDetalleCita));
 
     function botonEditar(atributos) {
         return `<button class="btn-icon edit" type="button" ${atributos} aria-label="Editar registro" title="Editar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.3 9.2l-3.5-3.5L4 16.5Zm13.9-9.4 1.2-1.2a1 1 0 0 0 0-1.4l-1.3-1.3a1 1 0 0 0-1.4 0l-1.2 1.2 3.5 3.5Z"/></svg></button>`;
@@ -603,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             tbody.innerHTML = productos.map(prod => `
-                <div class="data-row">
+                <div class="data-row producto-fila" data-ver-producto="${prod.idProducto}" role="button" tabindex="0" aria-label="Ver detalle de ${prod.nombre || 'producto'}">
                     <div><div class="main-text">${prod.idProducto ?? ''}</div></div>
                     <div><div class="main-text">${prod.nombre ?? ''}</div></div>
                     <div><div class="main-text">${prod.codigoBarra ?? ''}</div></div>
@@ -616,6 +693,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `).join('');
             tbody.querySelectorAll('[data-editar-producto]').forEach(button => button.addEventListener('click', () => abrirEntidad('producto', productos.find(producto => String(producto.idProducto) === button.dataset.editarProducto))));
+            tbody.querySelectorAll('[data-ver-producto]').forEach(fila => {
+                fila.addEventListener('click', evento => {
+                    if (!evento.target.closest('button')) abrirDetalleProducto(fila.dataset.verProducto);
+                });
+                fila.addEventListener('keydown', evento => {
+                    if (evento.key === 'Enter' || evento.key === ' ') {
+                        evento.preventDefault();
+                        abrirDetalleProducto(fila.dataset.verProducto);
+                    }
+                });
+            });
         } catch (error) {
             console.error('Error al cargar productos:', error);
             tbody.innerHTML = '<div class="data-row">Error al cargar productos desde la base de datos.</div>';
@@ -633,39 +721,71 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const ventas = await response.json();
-            const lista = Array.isArray(ventas) ? ventas : (ventas.ventas || ventas);
-
-            if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<div class="data-row">No hay ventas registradas.</div>';
-                return;
-            }
-
-            tbody.innerHTML = lista.map(venta => `
-                <div class="data-row venta-fila" data-ver-venta="${venta.idVenta}" role="button" tabindex="0" aria-label="Ver detalle de la venta ${venta.idVenta}">
-                    <div><div class="main-text">${venta.idVenta || ''}</div></div>
-                    <div><div class="main-text">${venta.fechaHora || ''}</div></div>
-                    <div><div class="main-text" style="font-size: 1.05rem; color: #005792;">$${parseFloat(venta.totalPagar || 0).toLocaleString('es-CO')}</div></div>
-                    <div><div class="main-text">${venta.metodoPago || ''}</div></div>
-                    <div><span class="status-badge status-active">${venta.estado || ''}</span></div>
-                    <div><div class="main-text">${venta.idEmpleado || ''}</div></div>
-                    <div><div class="main-text">${venta.idCliente || ''}</div></div>
-                </div>
-            `).join('');
-            tbody.querySelectorAll('[data-ver-venta]').forEach(fila => {
-                const abrir = () => abrirDetalleVenta(fila.dataset.verVenta);
-                fila.addEventListener('click', abrir);
-                fila.addEventListener('keydown', evento => {
-                    if (evento.key === 'Enter' || evento.key === ' ') {
-                        evento.preventDefault();
-                        abrir();
-                    }
-                });
-            });
+            ventasRegistradas = Array.isArray(ventas) ? ventas : (ventas.ventas || []);
+            renderizarVentasFiltradas();
         } catch (error) {
             console.error('Error al cargar ventas:', error);
             tbody.innerHTML = '<div class="data-row">Error al cargar ventas desde la base de datos.</div>';
         }
     }
+
+    function ventasFiltradas() {
+        const texto = (document.getElementById('ventas-buscar')?.value || '').trim().toLowerCase();
+        const fecha = document.getElementById('ventas-fecha')?.value || '';
+        const metodo = document.getElementById('ventas-metodo')?.value || '';
+        const estado = document.getElementById('ventas-estado')?.value || '';
+        return ventasRegistradas.filter(venta => {
+            const coincideTexto = !texto || [venta.idVenta, venta.nombreCliente, venta.idCliente, venta.metodoPago].some(valor => String(valor || '').toLowerCase().includes(texto));
+            return coincideTexto && (!fecha || String(venta.fechaHora || '').slice(0, 10) === fecha) && (!metodo || venta.metodoPago === metodo) && (!estado || venta.estado === estado);
+        });
+    }
+    function renderizarVentasFiltradas() {
+        const tbody = document.getElementById('tbody-ventas');
+        const resumen = document.getElementById('ventas-resumen');
+        if (!tbody) return;
+        const lista = ventasFiltradas();
+        const total = lista.reduce((suma, venta) => suma + Number(venta.totalPagar || 0), 0);
+        if (resumen) resumen.textContent = `${lista.length} venta(s) · Total: ${total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })}`;
+        if (!lista.length) {
+            tbody.innerHTML = '<div class="data-row">No hay ventas que coincidan con los filtros.</div>';
+            return;
+        }
+        tbody.innerHTML = lista.map(venta => `
+                <div class="data-row venta-fila" data-ver-venta="${venta.idVenta}" role="button" tabindex="0" aria-label="Ver detalle de la venta ${venta.idVenta}">
+                    <div><div class="main-text">${venta.idVenta || ''}</div></div>
+                    <div><div class="main-text">${venta.fechaHora || ''}</div></div>
+                    <div><div class="main-text" style="font-size: 1.05rem; color: #005792;">$${parseFloat(venta.totalPagar || 0).toLocaleString('es-CO')}</div></div>
+                    <div><div class="main-text">${venta.metodoPago || ''}</div></div>
+                    <div><span class="status-badge ${venta.estado === 'ANULADA' ? 'status-cancelled' : 'status-active'}">${venta.estado || ''}</span></div>
+                    <div><div class="main-text">${venta.idEmpleado || ''}</div></div>
+                    <div><div class="main-text">${venta.idCliente || ''}</div></div>
+                </div>
+            `).join('');
+        tbody.querySelectorAll('[data-ver-venta]').forEach(fila => {
+            const abrir = () => abrirDetalleVenta(fila.dataset.verVenta);
+            fila.addEventListener('click', abrir);
+            fila.addEventListener('keydown', evento => {
+                if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); abrir(); }
+            });
+        });
+    }
+    ['ventas-buscar', 'ventas-fecha', 'ventas-metodo', 'ventas-estado'].forEach(id => {
+        document.getElementById(id)?.addEventListener(id === 'ventas-buscar' ? 'input' : 'change', renderizarVentasFiltradas);
+    });
+    document.getElementById('btn-exportar-ventas')?.addEventListener('click', () => {
+        const filas = ventasFiltradas();
+        if (!filas.length) return alert('No hay ventas para exportar con los filtros actuales.');
+        const escaparCsv = valor => `"${String(valor ?? '').replaceAll('"', '""')}"`;
+        const contenido = [
+            ['ID venta', 'Fecha y hora', 'Cliente', 'ID cliente', 'Total', 'Método de pago', 'Estado', 'ID empleado'],
+            ...filas.map(venta => [venta.idVenta, venta.fechaHora, venta.nombreCliente || '', venta.idCliente, venta.totalPagar, venta.metodoPago, venta.estado, venta.idEmpleado])
+        ].map(fila => fila.map(escaparCsv).join(',')).join('\r\n');
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(new Blob([`\uFEFF${contenido}`], { type: 'text/csv;charset=utf-8' }));
+        enlace.download = `ventas-${new Date().toISOString().slice(0, 10)}.csv`;
+        enlace.click();
+        URL.revokeObjectURL(enlace.href);
+    });
 
     const modalDetalleVenta = document.getElementById('modal-detalle-venta');
     const contenidoDetalleVenta = document.getElementById('detalle-venta-contenido');
@@ -689,17 +809,109 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>Empleado:</strong> ${venta.nombreEmpleado || 'No registrado'}</p>
                     <p><strong>Fecha:</strong> ${venta.fechaHora || ''}</p>
                     <p><strong>Método de pago:</strong> ${venta.metodoPago || ''}</p>
+                    <p><strong>Estado:</strong> ${venta.estado || ''}</p>
                 </div>
                 <div class="detalle-venta-tabla">
                     <div class="detalle-venta-cabecera"><span>Producto</span><span>Código</span><span>Cantidad</span><span>Precio unitario</span><span>Subtotal</span></div>
                     ${venta.productos.map(producto => `<div class="detalle-venta-linea"><span>${producto.nombreProducto || ''}</span><span>${producto.codigoBarra || ''}</span><span>${producto.cantidad}</span><span>${dineroVenta(producto.precioUnitario)}</span><strong>${dineroVenta(producto.subtotalLinea)}</strong></div>`).join('')}
                 </div>
-                <p class="venta-total-admin">Total pagado: <strong>${dineroVenta(venta.totalPagar)}</strong></p>`;
+                <p class="venta-total-admin">Total pagado: <strong>${dineroVenta(venta.totalPagar)}</strong></p>
+                ${venta.estado === 'FINALIZADA' ? '<div class="modal-actions"><button class="toolbar-btn danger" type="button" data-anular-venta>Anular venta</button></div>' : ''}`;
+            contenidoDetalleVenta.querySelector('[data-anular-venta]')?.addEventListener('click', () => anularVenta(venta.idVenta));
+        } catch (error) {
+            contenidoDetalleVenta.innerHTML = `<p class="modal-message">${error.message}</p>`;
+        }
+    }
+    async function anularVenta(idVenta) {
+        if (!confirm('¿Anular esta venta? El inventario de sus productos será restaurado.')) return;
+        try {
+            const respuesta = await fetch(`/app/venta/${idVenta}/anular`, { method: 'POST', headers: encabezadosSesion() });
+            const datos = await respuesta.json().catch(() => ({}));
+            if (!respuesta.ok) throw new Error(datos.mensaje || 'No fue posible anular la venta.');
+            cerrarDetalleVenta();
+            await cargarVentas();
+            await cargarIndicadores();
         } catch (error) {
             contenidoDetalleVenta.innerHTML = `<p class="modal-message">${error.message}</p>`;
         }
     }
     document.querySelectorAll('[data-detalle-venta-close]').forEach(boton => boton.addEventListener('click', cerrarDetalleVenta));
+
+    const modalDetalleProducto = document.getElementById('modal-detalle-producto');
+    const contenidoDetalleProducto = document.getElementById('detalle-producto-contenido');
+    const tituloDetalleProducto = document.getElementById('detalle-producto-titulo');
+    const cerrarDetalleProducto = () => {
+        modalDetalleProducto?.classList.remove('is-open');
+        modalDetalleProducto?.setAttribute('aria-hidden', 'true');
+    };
+    async function abrirDetalleProducto(idProducto) {
+        modalDetalleProducto?.classList.add('is-open');
+        modalDetalleProducto?.setAttribute('aria-hidden', 'false');
+        contenidoDetalleProducto.innerHTML = '<p>Cargando detalle...</p>';
+        try {
+            const respuesta = await fetch(`/app/producto/${idProducto}/resumen`, { headers: encabezadosSesion() });
+            const datos = await respuesta.json();
+            if (!respuesta.ok) throw new Error(datos.message || 'No fue posible consultar el producto.');
+            const { producto, inventarios, ventas, stockActual, stockMinimo } = datos;
+            tituloDetalleProducto.textContent = producto.nombre || `Producto #${idProducto}`;
+            const estadoStock = stockActual <= 0 ? 'Agotado' : stockActual <= stockMinimo ? 'Stock bajo' : 'Disponible';
+            const claseStock = estadoStock === 'Disponible' ? 'stock-disponible' : (estadoStock === 'Stock bajo' ? 'stock-bajo' : 'stock-agotado');
+            contenidoDetalleProducto.innerHTML = `
+                <div class="detalle-producto-resumen">
+                    <p><strong>Código:</strong> ${producto.codigoBarra || 'Sin código'}</p><p><strong>Categoría:</strong> ${producto.categoria || 'Sin categoría'}</p>
+                    <p><strong>Precio de venta:</strong> ${dineroVenta(producto.precioVenta)}</p><p><strong>Vencimiento:</strong> ${producto.fechaVencimiento ? formatearFecha(producto.fechaVencimiento) : 'No registrado'}</p>
+                </div>
+                <div class="stock-resumen"><div><span>Stock actual</span><strong>${stockActual}</strong></div><div><span>Stock mínimo</span><strong>${stockMinimo}</strong></div><span class="stock-estado ${claseStock}">${estadoStock}</span></div>
+                <h4>Existencias por ubicación</h4>
+                <div class="detalle-producto-tabla"><div class="detalle-producto-cabecera"><span>Ubicación</span><span>Actual</span><span>Mínimo</span><span>Actualizado</span></div>${inventarios.length ? inventarios.map(item => `<div class="detalle-producto-linea"><span>${item.ubicacion || 'Sin ubicación'}</span><span>${item.stockActual}</span><span>${item.stockMinimo}</span><span>${item.fechaUltimaActualizacion ? formatearFecha(item.fechaUltimaActualizacion) : ''}</span></div>`).join('') : '<p class="detalle-vacio">No hay inventario registrado.</p>'}</div>
+                <h4>Últimas ventas</h4>
+                <div class="detalle-producto-tabla"><div class="detalle-producto-cabecera ventas-producto"><span>Venta</span><span>Fecha</span><span>Cantidad</span><span>Subtotal</span></div>${ventas.length ? ventas.map(venta => `<div class="detalle-producto-linea ventas-producto"><span>#${venta.idVenta}</span><span>${venta.fechaHora || ''}</span><span>${venta.cantidad}</span><strong>${dineroVenta(venta.subTotal)}</strong></div>`).join('') : '<p class="detalle-vacio">Este producto todavía no registra ventas.</p>'}</div>`;
+        } catch (error) {
+            contenidoDetalleProducto.innerHTML = `<p class="modal-message">${error.message}</p>`;
+        }
+    }
+    document.querySelectorAll('[data-detalle-producto-close]').forEach(boton => boton.addEventListener('click', cerrarDetalleProducto));
+
+    const modalDetalleCliente = document.getElementById('modal-detalle-cliente');
+    const contenidoDetalleCliente = document.getElementById('detalle-cliente-contenido');
+    const tituloDetalleCliente = document.getElementById('detalle-cliente-titulo');
+    const cerrarDetalleCliente = () => {
+        modalDetalleCliente?.classList.remove('is-open');
+        modalDetalleCliente?.setAttribute('aria-hidden', 'true');
+    };
+    async function abrirDetalleCliente(idCliente) {
+        modalDetalleCliente?.classList.add('is-open');
+        modalDetalleCliente?.setAttribute('aria-hidden', 'false');
+        contenidoDetalleCliente.innerHTML = '<p>Cargando ficha...</p>';
+        try {
+            const respuesta = await fetch(`/app/cliente/${idCliente}/resumen`, { headers: encabezadosSesion() });
+            const datos = await respuesta.json();
+            if (!respuesta.ok) throw new Error(datos.mensaje || 'No fue posible consultar el cliente.');
+            const { cliente, citas, ventas, totalCompras } = datos;
+            const nombreCompleto = `${cliente.nombre || ''} ${cliente.apellido || ''}`.trim();
+            tituloDetalleCliente.textContent = nombreCompleto || `Cliente #${idCliente}`;
+            contenidoDetalleCliente.innerHTML = `
+                <div class="detalle-cliente-resumen"><p><strong>Documento:</strong> ${cliente.documentoIdentidad || ''}</p><p><strong>Teléfono:</strong> ${cliente.telefono || 'No registrado'}</p><p><strong>Correo:</strong> ${cliente.correo || 'No registrado'}</p><p><strong>Dirección:</strong> ${cliente.direccion || 'No registrada'}</p></div>
+                <div class="cliente-acciones"><button type="button" class="toolbar-btn primary" data-cliente-nueva-venta="${cliente.idCliente}">+ Nueva venta</button><button type="button" class="toolbar-btn" data-cliente-nueva-cita="${cliente.idCliente}">+ Nueva cita</button><strong>Total de compras: ${dineroVenta(totalCompras)}</strong></div>
+                <h4>Últimas citas</h4><div class="detalle-producto-tabla"><div class="detalle-producto-cabecera citas-cliente"><span>Fecha</span><span>Hora</span><span>Tratamiento</span><span>Estado</span></div>${citas.length ? citas.map(cita => `<div class="detalle-producto-linea citas-cliente"><span>${cita.fecha || ''}</span><span>${cita.hora || ''}</span><span>${cita.tratamiento || ''}</span><span>${cita.estado || ''}</span></div>`).join('') : '<p class="detalle-vacio">No hay citas asociadas a este cliente.</p>'}</div>
+                <h4>Últimas ventas</h4><div class="detalle-producto-tabla"><div class="detalle-producto-cabecera ventas-cliente"><span>Venta</span><span>Fecha</span><span>Pago</span><span>Total</span></div>${ventas.length ? ventas.map(venta => `<div class="detalle-producto-linea ventas-cliente"><span>#${venta.idVenta}</span><span>${venta.fechaHora || ''}</span><span>${venta.metodoPago || ''}</span><strong>${dineroVenta(venta.totalPagar)}</strong></div>`).join('') : '<p class="detalle-vacio">No hay ventas registradas para este cliente.</p>'}</div>`;
+            contenidoDetalleCliente.querySelector('[data-cliente-nueva-venta]')?.addEventListener('click', () => {
+                cerrarDetalleCliente();
+                abrirModalVenta(cliente.idCliente);
+            });
+            contenidoDetalleCliente.querySelector('[data-cliente-nueva-cita]')?.addEventListener('click', async () => {
+                cerrarDetalleCliente();
+                await activarVista('agenda');
+                await abrirFormularioCita();
+                if (agendaPaciente) agendaPaciente.value = nombreCompleto;
+                if (agendaDocumento) agendaDocumento.value = cliente.documentoIdentidad || '';
+                if (agendaTelefono) agendaTelefono.value = cliente.telefono || '';
+            });
+        } catch (error) {
+            contenidoDetalleCliente.innerHTML = `<p class="modal-message">${error.message}</p>`;
+        }
+    }
+    document.querySelectorAll('[data-detalle-cliente-close]').forEach(boton => boton.addEventListener('click', cerrarDetalleCliente));
 
     // Registro de ventas dentro del panel principal de Administracion.
     const modalVenta = document.getElementById('modal-venta');
@@ -714,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let productosVenta = [];
 
     const dineroVenta = valor => Number(valor || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
-    const abrirModalVenta = async () => {
+    const abrirModalVenta = async (idClientePreseleccionado = null) => {
         modalVenta?.classList.add('is-open');
         modalVenta?.setAttribute('aria-hidden', 'false');
         ventaMensaje.textContent = '';
@@ -729,6 +941,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const clientes = clientesData.clientes || clientesData;
             ventaProducto.innerHTML = productosVenta.length ? productosVenta.map(producto => `<option value="${producto.idProducto}">${producto.nombre} - ${dineroVenta(producto.precioVenta)}</option>`).join('') : '<option value="">No hay productos</option>';
             ventaCliente.innerHTML = clientes.length ? `<option value="">Selecciona...</option>${clientes.map(cliente => `<option value="${cliente.idCliente}">${cliente.nombre} ${cliente.apellido || ''}</option>`).join('')}` : '<option value="">No hay clientes</option>';
+            if (idClientePreseleccionado) ventaCliente.value = String(idClientePreseleccionado);
         } catch (error) {
             ventaMensaje.textContent = error.message;
         }
@@ -1256,9 +1469,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             const lista = Array.isArray(data) ? data : (data[config.lista] || []);
             if (!lista.length) { tbody.innerHTML = '<div class="data-row">No hay registros.</div>'; return; }
-            tbody.innerHTML = lista.map(item => `<div class="data-row">${config.columnas.map(([campo, formato]) => `<div><div class="main-text">${escapeHtml(formato ? formato(item) : item[campo] || '')}</div></div>`).join('')}<div>${puedeCrearCitas ? `<div class="row-actions">${botonEditar(`data-editar="${item[config.id]}"`)}${botonEliminar(`data-eliminar="${item[config.id]}"`)}</div>` : '<span class="action-restricted">Sin permisos</span>'}</div></div>`).join('');
+            tbody.innerHTML = lista.map(item => `<div class="data-row${nombreEntidad === 'cliente' ? ' cliente-fila' : ''}"${nombreEntidad === 'cliente' ? ` data-ver-cliente="${item[config.id]}" role="button" tabindex="0" aria-label="Ver ficha de ${escapeHtml(item.nombre || 'cliente')}"` : ''}>${config.columnas.map(([campo, formato]) => `<div><div class="main-text">${escapeHtml(formato ? formato(item) : item[campo] || '')}</div></div>`).join('')}<div>${puedeCrearCitas ? `<div class="row-actions">${botonEditar(`data-editar="${item[config.id]}"`)}${botonEliminar(`data-eliminar="${item[config.id]}"`)}</div>` : '<span class="action-restricted">Sin permisos</span>'}</div></div>`).join('');
             tbody.querySelectorAll('[data-editar]').forEach(button => button.addEventListener('click', () => abrirEntidad(nombreEntidad, lista.find(item => String(item[config.id]) === button.dataset.editar))));
             tbody.querySelectorAll('[data-eliminar]').forEach(button => button.addEventListener('click', () => eliminarEntidad(nombreEntidad, button.dataset.eliminar)));
+            if (nombreEntidad === 'cliente') {
+                tbody.querySelectorAll('[data-ver-cliente]').forEach(fila => {
+                    fila.addEventListener('click', evento => { if (!evento.target.closest('button')) abrirDetalleCliente(fila.dataset.verCliente); });
+                    fila.addEventListener('keydown', evento => {
+                        if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); abrirDetalleCliente(fila.dataset.verCliente); }
+                    });
+                });
+            }
         } catch (error) {
             console.error(`Error al cargar ${nombreEntidad}:`, error);
             tbody.innerHTML = '<div class="data-row">Error al cargar los datos desde la base de datos.</div>';

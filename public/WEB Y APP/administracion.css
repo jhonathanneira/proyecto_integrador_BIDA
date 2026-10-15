@@ -457,6 +457,15 @@ body {
 }
 
 .module-toolbar { display: flex; justify-content: flex-end; }
+.ventas-filtros { display: grid; grid-template-columns: minmax(180px, 1.5fr) repeat(3, minmax(130px, 1fr)) auto; gap: 10px; align-items: center; margin-bottom: 8px; }
+.ventas-filtros input, .ventas-filtros select { min-height: 38px; padding: 8px 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; color: #334155; background: #fff; }
+.ventas-resumen { margin: 0 0 10px; color: #475569; font-size: .92rem; }
+.status-cancelled { color: #991b1b; background: #fee2e2; }
+.indicadores-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
+.indicador-card { display: grid; gap: 7px; padding: 16px; border: 1px solid #dbeafe; border-radius: 14px; background: linear-gradient(135deg, #f8fdff, #eff6ff); }
+.indicador-card span { color: #475569; font-size: .9rem; font-weight: 700; }
+.indicador-card strong { color: #005792; font-size: 1.55rem; }
+.indicador-card small { color: #64748b; }
 .venta-add-row { display: grid; grid-template-columns: minmax(0, 1fr) 120px auto; gap: 12px; align-items: end; }
 .venta-items { display: grid; gap: 8px; margin-top: 4px; }
 .venta-items p { margin: 0; color: #64748b; }
@@ -467,15 +476,57 @@ body {
 .venta-fila { cursor: pointer; }
 .venta-fila:hover { background: #eff6ff; outline: 1px solid #93c5fd; }
 .venta-fila:focus { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.producto-fila { cursor: pointer; }
+.producto-fila:hover { background: #eff6ff; outline: 1px solid #93c5fd; }
+.producto-fila:focus { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.cliente-fila { cursor: pointer; }
+.cliente-fila:hover { background: #eff6ff; outline: 1px solid #93c5fd; }
+.cliente-fila:focus { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.cita-fila { cursor: pointer; }
+.cita-fila:hover { background: #eff6ff; outline: 1px solid #93c5fd; }
+.cita-fila:focus { outline: 3px solid #38bdf8; outline-offset: 2px; }
 .detalle-venta-resumen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 20px; margin-bottom: 16px; color: #334155; }
 .detalle-venta-resumen p { margin: 0; }
 .detalle-venta-tabla { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 10px; }
 .detalle-venta-cabecera, .detalle-venta-linea { display: grid; grid-template-columns: minmax(180px, 2fr) 1fr .7fr 1fr 1fr; gap: 10px; min-width: 680px; padding: 10px 12px; align-items: center; }
 .detalle-venta-cabecera { background: #eff6ff; color: #075985; font-weight: 700; }
 .detalle-venta-linea { border-top: 1px solid #e2e8f0; color: #334155; }
+.detalle-producto-resumen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; color: #334155; }
+.detalle-producto-resumen p { margin: 0; }
+.stock-resumen { display: flex; align-items: center; gap: 18px; margin: 18px 0; padding: 14px; border-radius: 12px; background: #f8fafc; }
+.stock-resumen div { display: grid; gap: 3px; color: #475569; }
+.stock-resumen strong { color: #0f172a; font-size: 1.3rem; }
+.stock-estado { margin-left: auto; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: .85rem; }
+.stock-disponible { color: #166534; background: #dcfce7; }
+.stock-bajo { color: #92400e; background: #fef3c7; }
+.stock-agotado { color: #991b1b; background: #fee2e2; }
+.detalle-producto-contenido h4 { margin: 18px 0 8px; color: #0f172a; }
+.detalle-producto-tabla { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 10px; }
+.detalle-producto-cabecera, .detalle-producto-linea { display: grid; grid-template-columns: 2fr 1fr 1fr 1.3fr; gap: 10px; min-width: 580px; padding: 10px 12px; align-items: center; }
+.detalle-producto-cabecera { background: #eff6ff; color: #075985; font-weight: 700; }
+.detalle-producto-linea { border-top: 1px solid #e2e8f0; color: #334155; }
+.detalle-producto-cabecera.ventas-producto, .detalle-producto-linea.ventas-producto { grid-template-columns: .7fr 1.7fr .8fr 1fr; }
+.detalle-vacio { margin: 0; padding: 12px; color: #64748b; }
+.detalle-cliente-resumen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; color: #334155; }
+.detalle-cliente-resumen p { margin: 0; }
+.cliente-acciones { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 18px 0; padding: 12px; background: #f8fafc; border-radius: 12px; color: #0f172a; }
+.cliente-acciones strong { margin-left: auto; }
+.detalle-cliente-contenido h4 { margin: 18px 0 8px; color: #0f172a; }
+.detalle-cita-resumen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; color: #334155; }
+.detalle-cita-resumen p { margin: 0; }
+.cita-acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.detalle-producto-cabecera.citas-cliente, .detalle-producto-linea.citas-cliente { grid-template-columns: 1fr .8fr 2fr 1fr; }
+.detalle-producto-cabecera.ventas-cliente, .detalle-producto-linea.ventas-cliente { grid-template-columns: .7fr 1.7fr 1fr 1fr; }
 .entity-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; grid-column: 1 / -1; }
 .entity-fields label { display: grid; gap: 6px; font-weight: 700; color: #334155; }
 .entity-fields label.full-width { grid-column: 1 / -1; }
 @media (max-width: 640px) { .entity-fields { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .venta-add-row { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .detalle-venta-resumen { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .detalle-producto-resumen { grid-template-columns: 1fr; } .stock-resumen { flex-wrap: wrap; } .stock-estado { margin-left: 0; } }
+@media (max-width: 640px) { .detalle-cliente-resumen { grid-template-columns: 1fr; } .cliente-acciones strong { width: 100%; margin-left: 0; } }
+@media (max-width: 640px) { .detalle-cita-resumen { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .indicadores-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 500px) { .indicadores-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .ventas-filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 500px) { .ventas-filtros { grid-template-columns: 1fr; } }

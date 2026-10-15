@@ -100,6 +100,77 @@ module.exports = (db) => {
         }
     });
 
+    ruta.get('/indicadores', soloAdmin, async (_req, res) => {
+        const consultar = (sql) => new Promise((resolve, reject) => db.query(sql, (error, filas) => error ? reject(error) : resolve(filas)));
+        try {
+            const [ventas, citas, inventario, clientes] = await Promise.all([
+                consultar(`SELECT COALESCE(SUM(CASE WHEN DATE(fechaHora) = CURDATE() THEN totalPagar END), 0) AS ventasHoy,
+                    COALESCE(SUM(CASE WHEN YEAR(fechaHora) = YEAR(CURDATE()) AND MONTH(fechaHora) = MONTH(CURDATE()) THEN totalPagar END), 0) AS ventasMes FROM venta WHERE estado = 'FINALIZADA'`),
+                consultar(`SELECT COUNT(*) AS citasHoy, COALESCE(SUM(estado = 'Atendida'), 0) AS atendidasHoy,
+                    COALESCE(SUM(estado = 'Cancelada'), 0) AS canceladasHoy FROM cita WHERE fecha = CURDATE()`),
+                consultar(`SELECT COUNT(*) AS productosCriticos FROM (
+                    SELECT idProducto FROM inventario GROUP BY idProducto HAVING SUM(stockActual) <= SUM(stockMinimo)
+                ) AS criticos`),
+                consultar('SELECT COUNT(*) AS clientesRegistrados FROM cliente')
+            ]);
+            return res.status(200).send({
+                ventasHoy: Number(ventas[0]?.ventasHoy || 0), ventasMes: Number(ventas[0]?.ventasMes || 0),
+                citasHoy: Number(citas[0]?.citasHoy || 0), atendidasHoy: Number(citas[0]?.atendidasHoy || 0), canceladasHoy: Number(citas[0]?.canceladasHoy || 0),
+                productosCriticos: Number(inventario[0]?.productosCriticos || 0), clientesRegistrados: Number(clientes[0]?.clientesRegistrados || 0)
+            });
+        } catch (error) {
+            return res.status(500).send({ mensaje: 'No fue posible cargar los indicadores.', errorDetails: error.code });
+        }
+    });
+
+    ruta.post('/venta/:idVenta/anular', soloAdmin, async (req, res) => {
+        const idVenta = Number(req.params.idVenta);
+        if (!Number.isInteger(idVenta) || idVenta <= 0) return res.status(400).send({ mensaje: 'ID de venta inválido.' });
+        const obtenerConexion = () => new Promise((resolve, reject) => {
+            if (typeof db.getConnection !== 'function') return resolve(db);
+            db.getConnection((error, conexion) => error ? reject(error) : resolve(conexion));
+        });
+        let conexion;
+        let iniciada = false;
+        const query = (sql, valores) => new Promise((resolve, reject) => {
+            const callback = (error, resultado) => error ? reject(error) : resolve(resultado);
+            if (valores === undefined) conexion.query(sql, callback);
+            else conexion.query(sql, valores, callback);
+        });
+        try {
+            conexion = await obtenerConexion();
+            await query('START TRANSACTION');
+            iniciada = true;
+            const ventas = await query('SELECT estado FROM venta WHERE idVenta = ? FOR UPDATE', [idVenta]);
+            if (!ventas.length) {
+                const error = new Error('Venta no encontrada.'); error.codigo = 'NO_ENCONTRADA'; throw error;
+            }
+            if (ventas[0].estado !== 'FINALIZADA') {
+                const error = new Error('Solo se pueden anular ventas finalizadas.'); error.codigo = 'ESTADO_INVALIDO'; throw error;
+            }
+            const detalles = await query('SELECT idProducto, cantidad FROM detalleventa WHERE idVenta = ? FOR UPDATE', [idVenta]);
+            for (const detalle of detalles) {
+                // La venta descuenta del primer registro de inventario del producto;
+                // la devolución se realiza en esa misma ubicación.
+                const inventario = await query(
+                    'UPDATE inventario SET stockActual = stockActual + ?, fechaUltimaActualizacion = ? WHERE idProducto = ? ORDER BY idInventario ASC LIMIT 1',
+                    [detalle.cantidad, new Date(), detalle.idProducto]
+                );
+                if (!inventario.affectedRows) throw new Error(`No existe inventario para el producto ID: ${detalle.idProducto}`);
+            }
+            await query("UPDATE venta SET estado = 'ANULADA' WHERE idVenta = ?", [idVenta]);
+            await query('COMMIT');
+            iniciada = false;
+            return res.status(200).send({ mensaje: 'Venta anulada e inventario restaurado.' });
+        } catch (error) {
+            try { if (iniciada) await query('ROLLBACK'); } catch (rollbackError) { console.error('Error durante el ROLLBACK de anulación:', rollbackError); }
+            const conflicto = error.codigo === 'NO_ENCONTRADA' || error.codigo === 'ESTADO_INVALIDO';
+            return res.status(conflicto ? 409 : 500).send({ mensaje: conflicto ? error.message : 'No fue posible anular la venta.', ...(conflicto ? {} : { errorDetails: error.message }) });
+        } finally {
+            if (conexion && typeof conexion.release === 'function') conexion.release();
+        }
+    });
+
     ruta.get('/venta', soloAdmin, (req, res) => {
         const sql = `SELECT V.idVenta, V.fechaHora, V.totalPagar, V.metodoPago, V.estado, V.idEmpleado, V.idCliente,
             E.nombre AS nombreEmpleado, C.nombre AS nombreCliente FROM venta V
@@ -111,7 +182,7 @@ module.exports = (db) => {
     });
 
     ruta.get('/venta/:idVenta', soloAdmin, (req, res) => {
-        const sql = `SELECT V.idVenta, V.fechaHora, V.totalPagar, V.metodoPago, E.nombre AS nombreEmpleado, C.nombre AS nombreCliente,
+        const sql = `SELECT V.idVenta, V.fechaHora, V.totalPagar, V.metodoPago, V.estado, E.nombre AS nombreEmpleado, C.nombre AS nombreCliente,
             DV.cantidad, DV.precioUnitario, DV.subtotal AS subtotalLinea, P.nombre AS nombreProducto, P.codigoBarra
             FROM venta V JOIN empleado E ON V.idEmpleado = E.idEmpleado LEFT JOIN cliente C ON V.idCliente = C.idCliente
             JOIN detalleventa DV ON V.idVenta = DV.idVenta JOIN producto P ON DV.idProducto = P.idProducto WHERE V.idVenta = ?`;
@@ -120,7 +191,7 @@ module.exports = (db) => {
             if (!filas.length) return res.status(404).send({ mensaje: `Venta con ID ${req.params.idVenta} no encontrada` });
             return res.status(200).send({
                 idVenta: filas[0].idVenta, fechaHora: filas[0].fechaHora, totalPagar: filas[0].totalPagar,
-                metodoPago: filas[0].metodoPago, nombreEmpleado: filas[0].nombreEmpleado, nombreCliente: filas[0].nombreCliente,
+                metodoPago: filas[0].metodoPago, estado: filas[0].estado, nombreEmpleado: filas[0].nombreEmpleado, nombreCliente: filas[0].nombreCliente,
                 productos: filas.map(fila => ({ nombreProducto: fila.nombreProducto, codigoBarra: fila.codigoBarra, cantidad: fila.cantidad, precioUnitario: fila.precioUnitario, subtotalLinea: fila.subtotalLinea }))
             });
         });
