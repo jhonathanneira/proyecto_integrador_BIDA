@@ -1,0 +1,15 @@
+# Dependencias (esta carpeta es muy pesada y no se sube)
+node_modules/
+
+# Variables de entorno (aquí están tus contraseñas de BD)
+.env
+
+# Archivos generados (como el Word de la exposición)
+output/
+
+# Archivos del sistema
+Thumbs.db
+.DS_Store
+
+# Archivos de configuración de VS Code (opcional)
+.vscode/
